@@ -1,5 +1,5 @@
 # =====================================================================
-# ux-mizan Registry Schema v0.3  (ux-registry.yaml)
+# ux-mizan Registry Schema v0.4  (ux-registry.yaml)
 # =====================================================================
 # Two linked tables. Flows are PREMISES (Gate 0 + Gate 1 fill them, a
 # human locks them). Findings are FINDINGS (the audit fills them, each
@@ -80,6 +80,28 @@
 #       PROSE-SCHEMA-AUDIT.md called what it was: a [Y], claiming
 #       structural mitigation while shipping a paragraph. The fix is where
 #       the risk enters, so that is where the check sits.
+#
+#   U11. A [KKE] ENTRY NAMES ITS MISSING CONTROL. tier == "KKE" requires
+#       `kke_kind`, one of:
+#         control       a confound or symmetric check that could flip the
+#                       result has not run
+#         independence  whoever produced the claim is also its judge
+#         data          the measurement is designed; the data is not in
+#         validation    the INSTRUMENT is unvalidated -- a detector never
+#                       run against a case known to be positive
+#       and the field is REJECTED on any other tier: it records why an
+#       entry is KKE, not a note left behind after it stopped being one.
+#
+#       A FIELD rather than four new tags, deliberately. The six tiers are
+#       the one thing four sibling skills share, and forking the
+#       vocabulary inside one member costs exactly what makes them a
+#       family. The distinction is not this skill's either: Mizan already
+#       carries two of these without naming them (R2 is missing data, R8
+#       is missing independence).
+#
+#       Refutation, preregistered in ux-mizan-product-registry.yaml as
+#       H-UX006: if after three real registries nothing reads the field,
+#       it is bookkeeping that costs a line per entry -- drop it.
 #
 # WARNINGS (advisory; --strict promotes them to violations):
 #   W1. Every tiered finding is [K] — the flattery problem in a lab coat.
@@ -176,12 +198,16 @@
 #         answer the homogenisation question. Every registry in this repo
 #         already did, because the field was mandatory in prose; the bump
 #         only makes the prose checkable.
+#   0.4 - activates U11 (`kke_kind`). MIGRATION: an existing [KKE] entry
+#         must name which control is missing. Everything else is
+#         untouched, and the field is rejected on other tiers so it cannot
+#         become a stale annotation.
 # =====================================================================
 
 registry:
   project: "<application name>"
   owner: "<who locks the gates — a person, not the model>"
-  schema_version: "0.3"
+  schema_version: "0.4"
   methodology: "ux-mizan v0.1"
   mode: "lite"            # lite | full  (Gate 1 decides; SKILL.md, Modes)
   created: "YYYY-MM-DD"
@@ -239,6 +265,8 @@ findings:
       from it, what they then do, and why that leaves them lost or
       confused. Not a restatement of the violated principle.>
     tier: "H"
+    kke_kind: null                # REQUIRED when tier is "KKE"; rejected otherwise.
+                                  # control | independence | data | validation
     refutation_condition: >
       <the measurement that would make this finding false. Two-sided:
       both outcomes must teach something.>

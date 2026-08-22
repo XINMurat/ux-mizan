@@ -285,6 +285,8 @@ hypotheses:
     cost: "one schema field, one validator check"
     history:
       - { date: "2026-08-22", event: "preregistered v1 from external review. NOT implemented -- deliberately queued behind evidence that anyone needs it (see the over-engineering risk, H-UX007)." }
+      - { date: "2026-08-22", event: "IMPLEMENTED as U11 in schema 0.4, on the owner's decision to build it rather than wait. The queue-behind-evidence reasoning above is left in place: it was the recommendation, it was overruled, and both belong on the record. Tier stays [H] -- shipping the field is not evidence that anyone reads it, which is what the threshold asks." }
+      - { date: "2026-08-22", event: "Scope beyond the proposal: the field is also REJECTED on non-KKE tiers, so it cannot survive as a stale annotation after an entry is promoted or refuted. That direction was not in the review and is the half more likely to rot." }
 
   - id: "H-UX007"
     version: 1

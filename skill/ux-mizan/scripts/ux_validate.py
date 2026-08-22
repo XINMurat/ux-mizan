@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ux-mizan registry validator -- LLM-free static enforcement of U1-U10.
+ux-mizan registry validator -- LLM-free static enforcement of U1-U11.
 
 The rule that travels is the scripted one. Everything enforced only by
 SKILL.md prose is negotiable by the host's prose; everything in here
@@ -12,7 +12,7 @@ formula, append-only) live here and not in a paragraph.
 Two channels, for the reason Mizan and Kiyas both give: a tool that can
 only block teaches authors to write registries that do not trigger it.
 
-  * VIOLATIONS (U1-U10) block.
+  * VIOLATIONS (U1-U11) block.
   * WARNINGS (W1-W4) do not block by default. --strict promotes them.
 
 Usage:
@@ -47,6 +47,19 @@ VALID_PROVENANCE = {
     "structural-check", "walkthrough", "human", "moderated-session", "real-data",
 }
 VALID_METRIC_KINDS = {"structural", "accessibility", "behavioural"}
+
+# U11 — why an entry is [KKE]. A FIELD rather than four new tags: the six
+# tiers are what four sibling skills share, and forking the vocabulary
+# inside one member costs exactly what makes them a family. The four
+# reasons are not this skill's invention -- Mizan already carries two of
+# them without naming them (R2 is missing data, R8 is missing
+# independence).
+VALID_KKE_KINDS = {
+    "control",       # a confound or symmetric control that could flip it has not run
+    "independence",  # whoever produced the claim is also its judge
+    "data",          # the measurement is designed but the data is not collected
+    "validation",    # the INSTRUMENT is unvalidated (never run on a known-positive case)
+}
 VALID_FINDING_TYPES = {"flow-level", "component-contributing"}
 VALID_STATUS = {"open", "instrumented", "confirmed", "refuted"}
 
@@ -225,6 +238,18 @@ MSG = {
         "U10: finding {id} proposes a fix with no self_check_homogenisation. A redesign that never asked whether it is the generic default is how this skill spreads what it diagnoses.",
         "U10: {id} bulgusu duzeltme oneriyor ama self_check_homogenisation yok. Jenerik varsayilan mi diye sorulmamis bir redesign, bu skill'in teshis ettigi hastaligi yaydigi yoldur.",
     ),
+    "U11_no_kke_kind": (
+        "U11: finding {id} is at [KKE] with no kke_kind. 'A control is missing' is not actionable until it says WHICH one; valid: {allowed}.",
+        "U11: {id} bulgusu kke_kind olmadan [KKE]. 'Kontrol eksik' hangi kontrol denmeden eyleme donusmez; gecerli: {allowed}.",
+    ),
+    "U11_bad_kke_kind": (
+        "U11: finding {id} has kke_kind '{kind}'; valid values are {allowed}.",
+        "U11: {id} bulgusunun kke_kind degeri '{kind}'; gecerli degerler: {allowed}.",
+    ),
+    "U11_stray_kke_kind": (
+        "U11: finding {id} carries kke_kind '{kind}' but is not at [KKE] (tier [{tier}]). The field records why an entry is KKE, not a note kept after it stopped being one.",
+        "U11: {id} bulgusu kke_kind '{kind}' tasiyor ama [KKE] degil (katman [{tier}]). Bu alan bir kaydin neden KKE oldugunu tutar; KKE olmaktan cikinca kalan bir not degil.",
+    ),
     "W1_all_proven": (
         "W1: every tiered finding is [K]. An audit where nothing stayed hypothetical is flattery in a lab coat.",
         "W1: tum katmanli bulgular [K]. Hicbir seyin hipotez kalmadigi denetim, onlukle yapilan iltifattir.",
@@ -250,8 +275,8 @@ MSG = {
         "{path} bir ux-mizan registry'sine benzemiyor ('flows' anahtari yok).",
     ),
     "clean": (
-        "OK: {path} satisfies U1-U10.",
-        "TAMAM: {path} U1-U10 kurallarini sagliyor.",
+        "OK: {path} satisfies U1-U11.",
+        "TAMAM: {path} U1-U11 kurallarini sagliyor.",
     ),
 }
 
@@ -442,6 +467,17 @@ def check_findings(reg: dict, rep: Report) -> None:
                     rep.v("U8_no_baseline", id=fid, metric=metric_name,
                           fid=parent_id)
 
+        # ---- U11: a [KKE] entry says WHICH control is missing.
+        kke_kind = finding.get("kke_kind")
+        if tier == "KKE":
+            if not kke_kind:
+                rep.v("U11_no_kke_kind", id=fid, allowed=sorted(VALID_KKE_KINDS))
+            elif kke_kind not in VALID_KKE_KINDS:
+                rep.v("U11_bad_kke_kind", id=fid, kind=kke_kind,
+                      allowed=sorted(VALID_KKE_KINDS))
+        elif kke_kind:
+            rep.v("U11_stray_kke_kind", id=fid, kind=kke_kind, tier=tier)
+
         # ---- U10: a proposed fix must answer the homogenisation question.
         # SKILL.md names this self-check as the mitigation for its own top
         # risk (a skill that recommends redesigns drifting toward the
@@ -528,7 +564,7 @@ def load_baseline(ref: str, path: str, lang: str) -> dict | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="ux-mizan registry validator (U1-U10, W1-W4)")
+        description="ux-mizan registry validator (U1-U11, W1-W4)")
     parser.add_argument("registry", help="path to a ux-registry.yaml")
     parser.add_argument("--lang", choices=["en", "tr"], default="en")
     parser.add_argument("--against", metavar="GITREF",

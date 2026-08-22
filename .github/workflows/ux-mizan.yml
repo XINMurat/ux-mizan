@@ -49,7 +49,7 @@ jobs:
             echo "::warning::No baseline commit reachable — U4 (append-only) did NOT run."
           fi
 
-      - name: Validate every registry (U1-U10, U4 against the baseline)
+      - name: Validate every registry (U1-U11, U4 against the baseline)
         run: |
           set -e
           base="${{ steps.baseline.outputs.base }}"
@@ -290,6 +290,46 @@ jobs:
           echo "$out"
           echo "$out" | grep -q "U10:" || { echo "FAIL: U10 did not fire on an unanswered fix" >&2; exit 1; }
           echo "OK: U10 holds a redesign to its own self-check."
+
+      - name: Self-test — U11 must reject a [KKE] that names no missing control
+        run: |
+          set -e
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.4"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "navigational-multiscreen"
+              priority_weight: 1.0
+              frequency: 1.0
+              applicable_metrics: [task_success]
+              baseline: {values: {task_success: 0.5}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "flow-level"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "KKE"
+              refutation_condition: "x refutes"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 0.5
+              status: "open"
+              owner: "fe"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U11:" || { echo "FAIL: U11 did not fire on a KKE with no kke_kind" >&2; exit 1; }
+          # ...and the field is not allowed to outlive the tier it explains
+          sed -i 's/              tier: "KKE"/              tier: "H"
+              kke_kind: "data"/' "$tmp"
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out" | grep -q "U11: finding UX-001 carries kke_kind"             || { echo "FAIL: U11 allowed a stale kke_kind on a non-KKE entry" >&2; exit 1; }
+          echo "OK: U11 holds both directions."
 
       - name: Self-test — lostness stays undefined where it is undefined
         run: |

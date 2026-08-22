@@ -187,6 +187,12 @@ findings:
       users re-enter the amount rather than the currency, because the
       error message names the amount field.
     tier: "KKE"
+    kke_kind: "data"
+    kke_note: >
+      The mechanism is grounded and the metric is designed, but the
+      post-change measurement has not been collected yet. It is data that
+      is missing, not independence: the arbiter is form analytics, not the
+      author.
     refutation_condition: >
       If field error rate on the amount field drops below 0.1 after moving
       validation to blur, the late validation was the cause; no change

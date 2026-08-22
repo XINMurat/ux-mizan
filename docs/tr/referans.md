@@ -42,6 +42,15 @@ Etiketler düzyazı değil, etikettir: her dilde iki dilli kalır.
 | **U8** | Akışında ölçülmüş baseline olmayan davranışsal metrikte `[K]` |
 | **U9** | `min_n.n` ya da `min_n.decision_rule` olmadan `[K]` |
 | **U10** | `fix` öneren ama `self_check_homogenisation` yanıtlamayan bulgu |
+| **U11** | `kke_kind` olmayan ya da geçersiz olan `[KKE]` bulgusu; artık `[KKE]` olmayan bir kayıtta unutulmuş alan |
+
+`kke_kind` **hangi** kontrolün eksik olduğunu söyler: `control` (sonucu
+çevirebilecek karışıklık kontrolü koşmadı) · `independence` (iddiayı üreten
+aynı zamanda hakemi) · `data` (ölçüm tasarlandı, veri gelmedi) ·
+`validation` (ölçüm aracının kendisi, pozitif olduğu bilinen bir vakada hiç
+koşturulmadı). Dört yeni etiket değil bir **alan** — altı katman, dört
+kardeş skill'in paylaştığı tek şey; üstelik Mizan bu sebeplerden ikisini
+adlandırmadan zaten taşıyor (R2 veri eksikliği, R8 bağımsızlık eksikliği).
 
 | Uyarı | Neyi işaretler (tavsiye; `--strict` hataya çevirir) |
 |---|---|
@@ -77,7 +86,7 @@ Matris hem şemada belgelidir hem `ux_validate.py` içinde
 
 | Betik | Ürettiği | Çıktısının katmanı |
 |---|---|---|
-| `ux_validate.py` | U1–U10 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
+| `ux_validate.py` | U1–U11 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
 | `structural_checks.py` | Durum kapsamı, geri bildirim boşlukları, jenerik etiketler, nav derinliği, yetim rotalar | `[KKE]` — ne eksik |
 | `layout_signals.py` | Yerleşim izleri + her birinin izin verdiği davranışsal hipotez | iz `[KKE]`, iddia `[H]` |
 | `lostness.py` | Akış başına L; tamamlanan ve terk edilen ayrı raporlanır | anlam kazanması için Katman-B verisi gerekir |
@@ -94,4 +103,7 @@ adlandırması:
 2. **Yeni bir dedektör, bilinmeyen vakalarda güvenilmeden önce pozitif
    olduğu bilinen bir vakada koşturulur.** Buradaki her yapısal kontrol en
    az bir kez sessizce az-raporlayarak çıktı; az raporlayan tarayıcı temiz
-   koddan ayırt edilemez.
+   koddan ayırt edilemez. Bu kural, dış bir incelemenin ardından katkı
+   belgelerinden `SKILL.md`'ye taşındı — host'a giden dosya dışında her
+   yerde yazılıydı. Hâlâ betikte değil, ama artık ona uyması gereken
+   aracın görmediği bir yerde de değil.

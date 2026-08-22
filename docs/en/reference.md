@@ -42,6 +42,15 @@ The tags are labels, not prose: keep them bilingual in every language.
 | **U8** | `[K]` on a behavioural metric whose flow has no measured baseline for it |
 | **U9** | `[K]` with no `min_n.n` or no `min_n.decision_rule` |
 | **U10** | A finding proposing a `fix` with no `self_check_homogenisation` answer |
+| **U11** | A `[KKE]` finding with no `kke_kind`, an invalid one, or the field left on an entry that is no longer `[KKE]` |
+
+`kke_kind` says WHICH control is missing: `control` (a confound check that
+could flip it has not run) · `independence` (the producer of the claim is
+also its judge) · `data` (the measurement is designed, the data is not in)
+· `validation` (the instrument itself was never run against a
+known-positive case). A field, not four new tags — the six tiers are what
+the four sibling skills share, and Mizan already carries two of these
+reasons without naming them (R2 missing data, R8 missing independence).
 
 | Warning | What it flags (advisory; `--strict` promotes) |
 |---|---|
@@ -77,7 +86,7 @@ one that runs, and the disagreement is itself a finding.
 
 | Script | Produces | Tier of its output |
 |---|---|---|
-| `ux_validate.py` | U1–U10 verdicts, W1–W4 warnings | — (it checks, it does not claim) |
+| `ux_validate.py` | U1–U11 verdicts, W1–W4 warnings | — (it checks, it does not claim) |
 | `structural_checks.py` | State coverage, feedback gaps, generic labels, nav depth, orphan routes | `[KKE]` — what is missing |
 | `layout_signals.py` | Arrangement traces + the behavioural hypothesis each licenses | trace `[KKE]`, claim `[H]` |
 | `lostness.py` | Per-flow L, completed and abandoned reported apart | needs Layer-B data to mean anything |
@@ -93,4 +102,8 @@ Both are in prose, and both are load-bearing. They are listed here because
 2. **A new detector runs against a known-positive case before it is
    trusted on unknown ones.** Every structural check here has shipped a
    silent under-report at least once, and an under-reporting checker is
-   indistinguishable from a clean codebase.
+   indistinguishable from a clean codebase. This one moved from the
+   contributor docs into `SKILL.md` after an external review pointed out
+   it was written everywhere except the file that travels into a host —
+   still unscripted, but no longer invisible to the tool that must obey
+   it.

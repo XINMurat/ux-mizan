@@ -162,7 +162,10 @@ host's prose and a script is not.
 U5–U10 add refutability, the metric-applicability gate,
 baseline-before-a-behavioural-`[K]`, a locked `min_n`, and — since a
 paragraph could not carry it — the rule that any proposed `fix` must
-answer the homogenisation question in writing (U10). `--strict` promotes the advisory
+answer the homogenisation question in writing (U10). U11 makes a `[KKE]`
+say WHICH control is missing (`control` / `independence` / `data` /
+`validation`), because "a control is missing" is not actionable until it
+names one. `--strict` promotes the advisory
 W1–W4 to failures; CI runs strict, local runs do not.
 
 ## Metric applicability — good genericity, not one-size-fits-all
