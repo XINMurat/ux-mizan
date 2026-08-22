@@ -1,0 +1,282 @@
+# =====================================================================
+# ux-mizan Registry Schema v0.3  (ux-registry.yaml)
+# =====================================================================
+# Two linked tables. Flows are PREMISES (Gate 0 + Gate 1 fill them, a
+# human locks them). Findings are FINDINGS (the audit fills them, each
+# bound to a flow). The premise/finding split is Mizan's claim/evidence
+# split, transposed to experience.
+#
+# STATUS: v0.2. Run #1 (self-validation) exercised only the Layer-A
+# script and the app_type taxonomy -- the latter came back refuted and
+# was extended (see SCHEMA VERSIONS 0.2). The gates, the walkthrough,
+# the severity formula against a real backlog and every behavioural
+# metric remain untested, so everything here is still [H].
+#
+# HARD RULES (ux_validate.py enforces these WITHOUT a model):
+#
+#   U1. STRUCTURAL [K] LOCK. tier == "K" requires a non-null
+#       evidence_artifact_id that RESOLVES, and source_provenance in
+#       {real-data, moderated-session}. A model may not promote its own
+#       output. "If the referee writes it, there is no [K]."
+#
+#   U2. FLOW PRIMACY. parent_flow_id is mandatory on every finding and
+#       MUST resolve to an existing flow. A component-contributing
+#       finding cannot exist unattached: scoring a component in
+#       isolation is impossible at the schema level, not discouraged in
+#       prose.
+#
+#   U3. AUDITABLE SEVERITY. severity == failure_magnitude x
+#       priority_weight x frequency, where priority_weight is read from
+#       the PARENT FLOW (never restated on the finding) and frequency
+#       from the finding or, when null, from its flow. The validator
+#       recomputes and rejects a mismatch beyond 1e-6. Because
+#       priority_weight is human-locked, the model cannot re-rank the
+#       backlog by rewriting weights.
+#
+#   U4. APPEND-ONLY + [R] PERMANENCE. Under --against, no flow_id or
+#       finding_id present in the baseline may disappear, and no entry
+#       may move OUT of tier R. Refuted findings are the record of what
+#       the audit itself got wrong; deleting them deletes the audit's
+#       own error rate.
+#
+#   U5. REFUTABILITY. Every finding needs a non-empty
+#       refutation_condition AND a metric with a named instrument. A
+#       finding no measurement can falsify is decoration.
+#
+#   U6. METRIC APPLICABILITY GATE. A finding's metric.name must appear
+#       in the parent flow's applicable_metrics, and every entry of
+#       applicable_metrics must be legal for that flow's app_type (see
+#       METRIC MATRIX below). The validator checks BOTH hops. This is
+#       what stops "good genericity" from decaying into "the same
+#       metrics everywhere" — lostness on a single-canvas tool is a
+#       category error and fails here.
+#
+#   U7. GATE PROVENANCE. Every flow carries gate_provenance, and
+#       gate_0.locked_by must be "human" before its priority_weight
+#       counts as locked. A model-inferred purpose audited against
+#       itself is a closed loop. If gate 0 is not locked, every finding
+#       on that flow is capped at [H] (K/R are rejected). When a gate is
+#       re-opened, gate_provenance.version is bumped; findings still
+#       citing the old version are flagged — they rest on a revised
+#       premise, and premise drift is itself a finding.
+#
+#   U8. BASELINE BEFORE A BEHAVIOURAL [K]. A finding at [K] whose
+#       metric.kind == "behavioural" requires the parent flow's baseline
+#       block to carry a measured value for that metric. "L = 0.55"
+#       alone is uninterpretable (references/metrics.md, Baseline).
+#       Smith's 0.4/0.5 cut-offs come from hypertext studies and are NOT
+#       validated for your app type.
+#
+#   U9. min_n BEFORE A FLIP. tier == "K" requires min_n.n and
+#       min_n.decision_rule. An observation count chosen after seeing
+#       the data is HARKing with a UX vocabulary.
+#
+#   U10. A FIX ANSWERS THE HOMOGENISATION QUESTION. A finding carrying a
+#       non-empty `fix` must carry a non-empty
+#       `self_check_homogenisation`. SKILL.md names this self-check as the
+#       mitigation for risk #1 -- a skill that recommends redesigns
+#       drifting toward the generic default and spreading the disease it
+#       diagnoses -- and until 0.3 left it entirely to prose, which
+#       PROSE-SCHEMA-AUDIT.md called what it was: a [Y], claiming
+#       structural mitigation while shipping a paragraph. The fix is where
+#       the risk enters, so that is where the check sits.
+#
+# WARNINGS (advisory; --strict promotes them to violations):
+#   W1. Every tiered finding is [K] — the flattery problem in a lab coat.
+#   W2. No flow-level finding exists: an audit made only of component
+#       nits usually means the walkthrough never ran.
+#   W3. A flow has no measured baseline at all — nothing on it will ever
+#       be interpretable.
+#   W4. An open finding with no owner and no scheduled measurement.
+#
+# TIERS: K proven | H plausible hypothesis | S speculative
+#        R refuted | KKE critical control missing | Y misleading
+#
+# =====================================================================
+# METRIC MATRIX — which metrics an app_type may switch ON
+# =====================================================================
+# ux_validate.py hard-codes this map (METRIC_MATRIX) so it travels
+# without a model. Keys are app_type; values are the metric names that
+# may legally appear in a flow's applicable_metrics.
+#
+#   navigational-multiscreen:
+#     lostness, task_success, time_on_task, first_click_accuracy,
+#     backtrack_rate, rage_click_rate, dead_click_rate,
+#     step_abandonment, sus, orphan_pages, nav_depth,
+#     generic_label_count, state_coverage_ratio, feedback_gap_count,
+#     consistency_deviation_count, nonsemantic_interactive_count,
+#     axe_violations, lighthouse_a11y, keyboard_only_completion
+#
+#   form-heavy-transactional:  (lostness OFF — the path is prescribed;
+#     the failure is field-level, not navigational)
+#     task_success, time_on_task, step_abandonment, field_error_rate,
+#     field_retry_rate, validation_timing_violations, rage_click_rate,
+#     dead_click_rate, sus, state_coverage_ratio, feedback_gap_count,
+#     generic_label_count, consistency_deviation_count,
+#     nonsemantic_interactive_count, axe_violations, lighthouse_a11y,
+#     keyboard_only_completion
+#
+#   single-canvas-tool:  (lostness AND nav_depth OFF — there is one
+#     screen; revisits are work, not wandering)
+#     task_success, time_on_task, undo_rate, tool_discovery_rate,
+#     rage_click_rate, dead_click_rate, sus, state_coverage_ratio,
+#     feedback_gap_count, generic_label_count,
+#     consistency_deviation_count, nonsemantic_interactive_count,
+#     axe_violations, lighthouse_a11y, keyboard_only_completion
+#
+#   b2b-internal-dashboard:  (sus OFF as a headline — a captive user
+#     cannot leave, so satisfaction is floor-censored; task_success and
+#     time_on_task still move and stay on)
+#     lostness, task_success, time_on_task, first_click_accuracy,
+#     backtrack_rate, dead_click_rate, filter_reset_rate,
+#     export_fallback_rate, orphan_pages, nav_depth,
+#     generic_label_count, state_coverage_ratio, feedback_gap_count,
+#     consistency_deviation_count, nonsemantic_interactive_count,
+#     axe_violations, lighthouse_a11y, keyboard_only_completion
+#
+#   content-consumption:  (task_success OFF — there is often no task;
+#     scroll and return behaviour carry the signal)
+#     scroll_depth, return_rate, read_completion, first_click_accuracy,
+#     dead_click_rate, rage_click_rate, orphan_pages, nav_depth,
+#     generic_label_count, state_coverage_ratio, feedback_gap_count,
+#     consistency_deviation_count, nonsemantic_interactive_count,
+#     axe_violations, lighthouse_a11y, keyboard_only_completion
+#
+#   guided-sequence:  (lostness AND nav_depth OFF — the server enforces the
+#     order, so a revisit is re-reading, not wandering. Added in 0.2: the
+#     first self-validation run met a learning mode that is a TASK with a
+#     PRESCRIBED path whose content must actually be READ, and no existing
+#     category covered it without a union of two.)
+#     task_success, time_on_task, step_abandonment, read_completion,
+#     scroll_depth, resume_rate, backtrack_rate, rage_click_rate,
+#     dead_click_rate, sus, generic_label_count, state_coverage_ratio,
+#     feedback_gap_count, consistency_deviation_count,
+#     nonsemantic_interactive_count, axe_violations, lighthouse_a11y,
+#     keyboard_only_completion
+#
+# An app that is genuinely two of these gets TWO flows with different
+# app_type — never one flow holding the union of both metric sets.
+#
+# =====================================================================
+# SCHEMA VERSIONS
+#   0.1 — initial two-table format; rules U1-U9 and warnings W1-W4
+#         active. No migration path yet: nothing has been written
+#         against an earlier version. When 0.2 lands, follow Mizan's
+#         convention — old files stay valid and unenforced until their
+#         version is bumped deliberately, because a version bump that
+#         breaks the build teaches people to avoid version bumps.
+#   0.2 - adds the `guided-sequence` app_type. The five-category taxonomy
+#         of 0.1 is REFUTED, not revised away: it could not classify a
+#         server-enforced learning mode without the union of
+#         form-heavy-transactional and content-consumption, which is the
+#         exact condition DECISIONS.md 3 preregistered as its refutation.
+#         MIGRATION: none. Existing app_type values keep working; the new
+#         one is additive.
+#   0.3 - activates U10. MIGRATION: a finding that proposes a fix must now
+#         answer the homogenisation question. Every registry in this repo
+#         already did, because the field was mandatory in prose; the bump
+#         only makes the prose checkable.
+# =====================================================================
+
+registry:
+  project: "<application name>"
+  owner: "<who locks the gates — a person, not the model>"
+  schema_version: "0.3"
+  methodology: "ux-mizan v0.1"
+  mode: "lite"            # lite | full  (Gate 1 decides; SKILL.md, Modes)
+  created: "YYYY-MM-DD"
+  status_note: >
+    v0.1 — this skill has not been validated on a real application.
+    Every finding below is [H] or [KKE] unless it cites a Layer-B
+    artifact.
+
+# ---------------------------------------------------------------------
+# TABLE A — FLOWS (premises; Gate 0 + Gate 1 fill them, a human locks)
+# ---------------------------------------------------------------------
+flows:
+  - flow_id: "F-001"
+    task_name: "<the job the user is trying to get done>"
+    app_type: "navigational-multiscreen"
+    priority_weight: 1.0          # HUMAN-LOCKED at Gate 0. 0.0-1.0.
+    frequency: 0.0                # estimated uses per user per week
+    canonical_path_R: 0           # minimum screens to complete (lostness R)
+    entry_point: "<where the flow starts — route or screen>"
+    success_definition: "<what counts as done — locked at Gate 0>"
+    success_screen: "<the route or event that marks completion, matchable
+                      by a script — scripts/lostness.py needs this one>"
+    applicable_metrics:           # subset of the matrix for this app_type
+      - lostness                  # (the placeholder finding below uses this one)
+    baseline:                     # measured BEFORE any redesign (U8)
+      measured_at: null
+      values: {}                  # e.g. {lostness: 0.42, task_success: 0.71}
+      n: null
+      instrument: null            # what produced these numbers
+    gate_provenance:
+      version: 1
+      gate_0:
+        locked_by: "human"        # human | model-default | unanswered
+        locked_at: "YYYY-MM-DD"
+        note: "<what the human actually approved>"
+      gate_1:
+        locked_by: "human"
+        answers:
+          platform: "<web | ios | android | desktop>"
+          maturity: "<prototype | live>"
+          monthly_completions: null
+          effort_budget: "<hours or days the team can spend>"
+
+# ---------------------------------------------------------------------
+# TABLE B — FINDINGS (the audit fills them; every row hangs off a flow)
+# ---------------------------------------------------------------------
+findings:
+  - finding_id: "UX-001"
+    parent_flow_id: "F-001"       # MANDATORY (U2)
+    finding_type: "flow-level"    # flow-level | component-contributing
+    principle: "<IA | information scent | consistency | feedback | mapping | load>"
+    location: "<file:line or component path — 'in this part' is banned>"
+    mechanism: >
+      <the causal chain: what the user perceives, what they conclude
+      from it, what they then do, and why that leaves them lost or
+      confused. Not a restatement of the violated principle.>
+    tier: "H"
+    refutation_condition: >
+      <the measurement that would make this finding false. Two-sided:
+      both outcomes must teach something.>
+    metric:
+      name: "lostness"            # must be in the flow's applicable_metrics (U6)
+      kind: "behavioural"         # structural | accessibility | behavioural
+      instrument: "<what returns the verdict — never 'the model'>"
+      threshold_support: "<numeric>"
+      threshold_refute: "<numeric>"
+    min_n:
+      n: null
+      decision_rule: "<locked BEFORE the data arrives (U9)>"
+    evidence_artifact_id: null    # non-null and resolving, required for [K] (U1)
+    source_provenance: "structural-check"  # structural-check | walkthrough |
+                                           # human | moderated-session | real-data
+    gate_provenance_version: 1    # the flow premise version this rests on (U7)
+    failure_magnitude: 0.0        # 0.0-1.0, share of the flow estimated lost
+    frequency: null               # null -> inherit the parent flow's frequency
+    severity: 0.0                 # RECOMPUTED by the validator (U3)
+    status: "open"                # open | instrumented | confirmed | refuted
+    owner: null
+    fix: >
+      <the smallest change with the largest effect; name the file.>
+    self_check_homogenisation: >
+      <Risk 1. Does this fix follow from THIS app's Gate-0 purpose, or is
+      it the generic default (the shadcn/Tailwind mean)? Answer it; do
+      not skip it.>
+
+# ---------------------------------------------------------------------
+# EVIDENCE ARTIFACTS — what a [K] points at
+# ---------------------------------------------------------------------
+evidence_artifacts:
+  - artifact_id: "EV-001"
+    kind: "moderated-session"     # moderated-session | telemetry-export |
+                                  # axe-report | lighthouse-report | recording
+    collected_at: "YYYY-MM-DD"
+    n: 0
+    location: "<path or URL to the raw artifact>"
+    collected_by: "<who — a model may not be the sole collector>"
+    honesty_annexes:              # MANDATORY, non-empty (Mizan R5, inherited)
+      - "<sample size / recruitment bias / single-session caveat>"

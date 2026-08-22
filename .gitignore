@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# Audit runs against real applications stay out of the public repo.
+# They live in ../ux-mizan-runs/ — see SELF-VALIDATION.md for what the
+# first run found about the SKILL, which is the part that is publishable.
+runs/

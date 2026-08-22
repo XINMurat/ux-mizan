@@ -1,0 +1,6 @@
+title: "ux-mizan — Evidence-Tiered UX Auditing"
+description: "A Claude skill that audits experience with the same discipline Mizan applies to claims: evidence tiers, human-locked gates, preregistered thresholds and an append-only registry. Bilingual TR/EN."
+theme: jekyll-theme-minimal
+lang: en
+# jekyll-relative-links is enabled by default on GitHub Pages, so links to
+# .md files below resolve on both github.com and the published site.

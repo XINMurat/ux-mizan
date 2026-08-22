@@ -1,0 +1,264 @@
+# ux-mizan registry — worked example
+#
+# A fictional B2B invoicing app, audited in Lite mode. It is here to show
+# the SHAPE of a registry that passes `ux_validate.py --strict`, including
+# the two things people leave out: an [R] finding that stayed on the
+# record, and a [K] that had to earn its artifact, its baseline and its
+# min_n before the validator would accept it.
+#
+# Note UX-004: a walkthrough hypothesis that the data knocked down. It is
+# the most valuable row in the file — it is the audit's own error rate.
+
+registry:
+  project: "Fatura (fictional)"
+  owner: "Product owner (human) — locks gates 0, 3, 4"
+  schema_version: "0.1"
+  methodology: "ux-mizan v0.1"
+  mode: "lite"
+  created: "2026-08-22"
+  status_note: >
+    v0.1 — the skill itself is unvalidated. Findings below are [H]/[KKE]
+    unless they cite a Layer-B artifact.
+
+flows:
+  - flow_id: "F-001"
+    task_name: "Send an invoice to a client and get it marked as sent"
+    app_type: "navigational-multiscreen"
+    priority_weight: 1.0
+    frequency: 4.0
+    canonical_path_R: 4
+    entry_point: "/invoices"
+    success_definition: "/invoices/:id/sent confirmation screen reached"
+    success_screen: "/sent"
+    applicable_metrics:
+      - lostness
+      - task_success
+      - first_click_accuracy
+      - backtrack_rate
+      - generic_label_count
+      - feedback_gap_count
+    baseline:
+      measured_at: "2026-07-15"
+      values:
+        lostness: 0.58
+        task_success: 0.72
+        first_click_accuracy: 0.41
+      n: 8
+      instrument: "8 moderated task sessions, protocol in docs/protocol-2026-07.md"
+    gate_provenance:
+      version: 1
+      gate_0:
+        locked_by: "human"
+        locked_at: "2026-07-10"
+        note: >
+          Owner ranked jobs: send invoice (1.0) > chase an unpaid one (0.7)
+          > monthly export (0.3). Confirmed "sent" is the success event,
+          not "saved".
+      gate_1:
+        locked_by: "human"
+        answers:
+          platform: "web"
+          maturity: "live"
+          monthly_completions: 210
+          effort_budget: "3 developer-days this quarter"
+
+  - flow_id: "F-002"
+    task_name: "Reconcile a payment against an open invoice"
+    app_type: "form-heavy-transactional"
+    priority_weight: 0.7
+    frequency: 2.0
+    canonical_path_R: 3
+    entry_point: "/payments/new"
+    success_definition: "invoice status flips to paid"
+    success_screen: "/payments/confirmed"
+    applicable_metrics:
+      - task_success
+      - field_error_rate
+      - step_abandonment
+      - feedback_gap_count
+      - keyboard_only_completion
+    baseline:
+      measured_at: "2026-07-15"
+      values:
+        task_success: 0.55
+        field_error_rate: 0.31
+      n: 8
+      instrument: "same session batch as F-001"
+    gate_provenance:
+      version: 1
+      gate_0:
+        locked_by: "human"
+        locked_at: "2026-07-10"
+        note: "Owner: reconciliation is finance-only, weight 0.7, not 1.0."
+      gate_1:
+        locked_by: "human"
+        answers:
+          platform: "web"
+          maturity: "live"
+          monthly_completions: 140
+          effort_budget: "shares the 3 developer-days"
+
+findings:
+  - finding_id: "UX-001"
+    parent_flow_id: "F-001"
+    finding_type: "flow-level"
+    principle: "information scent"
+    location: "src/invoices/InvoiceActions.tsx:64"
+    mechanism: >
+      The only action on a drafted invoice is labelled "Continue", which
+      carries no scent of sending. Users read it as "keep editing", leave
+      to look for a Send button in the sidebar, do not find one, and come
+      back — the backtrack that shows up as the 0.58 baseline lostness.
+    tier: "K"
+    refutation_condition: >
+      If first-click accuracy on the draft screen is >= 0.8 across the
+      session batch, the label is not the blocker and this finding is
+      refuted; <= 0.5 supports it.
+    metric:
+      name: "first_click_accuracy"
+      kind: "behavioural"
+      instrument: "moderated task sessions, first click recorded by the moderator"
+      threshold_support: "<= 0.5"
+      threshold_refute: ">= 0.8"
+    min_n:
+      n: 8
+      decision_rule: "8 sessions; supported if >= 5 participants miss the Send action on first click"
+    evidence_artifact_id: "EV-001"
+    source_provenance: "moderated-session"
+    gate_provenance_version: 1
+    failure_magnitude: 0.6
+    frequency: 4.0
+    severity: 2.4
+    status: "confirmed"
+    owner: "frontend"
+    fix: >
+      Rename to "Send invoice" and move it out of the overflow menu in
+      InvoiceActions.tsx. One-line change, largest measured effect.
+    self_check_homogenisation: >
+      From the Gate-0 purpose: "sent" is this app's north-star event, so
+      the primary action names it. Not a generic default — the generic
+      default is exactly the "Continue" we are removing.
+
+  - finding_id: "UX-002"
+    parent_flow_id: "F-001"
+    finding_type: "component-contributing"
+    principle: "feedback"
+    location: "src/invoices/useSendInvoice.ts:31"
+    mechanism: >
+      The send mutation has no success handler and no toast. The row
+      updates only after a refetch, so for ~1.5s nothing visible happens;
+      participants pressed the action a second time, producing duplicate
+      sends they then had to undo.
+    tier: "H"
+    refutation_condition: >
+      If the duplicate-send rate is < 2% of sends over 4 weeks, the silent
+      window is not costing anything and this is refuted; >= 5% supports it.
+    metric:
+      name: "feedback_gap_count"
+      kind: "structural"
+      instrument: "scripts/structural_checks.py feedback-gap check"
+      threshold_support: ">= 1 gap on this mutation"
+      threshold_refute: "0 gaps after the fix"
+    min_n:
+      n: null
+      decision_rule: "structural check is deterministic; no N applies until the behavioural follow-up runs"
+    evidence_artifact_id: null
+    source_provenance: "structural-check"
+    gate_provenance_version: 1
+    failure_magnitude: 0.25
+    frequency: 4.0
+    severity: 1.0
+    status: "open"
+    owner: "frontend"
+    fix: >
+      Add an optimistic status change plus a toast in useSendInvoice.ts.
+    self_check_homogenisation: >
+      Generic default (toast) and knowingly so — nothing about this app's
+      purpose calls for a bespoke feedback pattern here.
+
+  - finding_id: "UX-003"
+    parent_flow_id: "F-002"
+    finding_type: "flow-level"
+    principle: "cognitive load"
+    location: "src/payments/PaymentForm.tsx:120"
+    mechanism: >
+      Amount, currency and FX date are validated only on submit, so a
+      mismatched currency surfaces after the whole form is filled. Finance
+      users re-enter the amount rather than the currency, because the
+      error message names the amount field.
+    tier: "KKE"
+    refutation_condition: >
+      If field error rate on the amount field drops below 0.1 after moving
+      validation to blur, the late validation was the cause; no change
+      (>= 0.25) refutes it and points at the message wording instead.
+    metric:
+      name: "field_error_rate"
+      kind: "behavioural"
+      instrument: "form analytics: errors per submitted form, per field"
+      threshold_support: "< 0.10 after the change"
+      threshold_refute: ">= 0.25 after the change"
+    min_n:
+      n: 60
+      decision_rule: "60 submissions post-change; compare against the 0.31 baseline"
+    evidence_artifact_id: null
+    source_provenance: "walkthrough"
+    gate_provenance_version: 1
+    failure_magnitude: 0.4
+    frequency: 2.0
+    severity: 0.56
+    status: "instrumented"
+    owner: "frontend"
+    fix: >
+      Validate currency on blur and name the currency field in the error.
+    self_check_homogenisation: >
+      From the purpose: finance users work in batches, so failing early
+      per field beats the generic single submit-time summary.
+
+  - finding_id: "UX-004"
+    parent_flow_id: "F-001"
+    finding_type: "component-contributing"
+    principle: "IA"
+    location: "src/nav/Sidebar.tsx:22"
+    mechanism: >
+      Walkthrough hypothesis: the sidebar's four-level nesting was
+      expected to be the source of backtracking on the send flow.
+    tier: "R"
+    refutation_condition: >
+      If the backtrack rate is unchanged when the sidebar is collapsed by
+      default, nesting is not the cause.
+    metric:
+      name: "backtrack_rate"
+      kind: "behavioural"
+      instrument: "moderated task sessions, backtracks counted by the moderator"
+      threshold_support: "backtracks drop by >= 30% with the sidebar collapsed"
+      threshold_refute: "change < 10%"
+    min_n:
+      n: 8
+      decision_rule: "same 8-session batch, counterbalanced order"
+    evidence_artifact_id: "EV-001"
+    source_provenance: "moderated-session"
+    gate_provenance_version: 1
+    failure_magnitude: 0.0
+    frequency: 4.0
+    severity: 0.0
+    status: "refuted"
+    owner: "frontend"
+    fix: >
+      None. Kept on the record: the backtracking was the label (UX-001),
+      not the nesting. This row is why the sidebar rebuild did not happen.
+    self_check_homogenisation: >
+      The proposed fix here WAS the generic default ("flatten the nav"),
+      and the data refused it. Worth remembering.
+
+evidence_artifacts:
+  - artifact_id: "EV-001"
+    kind: "moderated-session"
+    collected_at: "2026-07-15"
+    n: 8
+    location: "research/2026-07-15-sessions/"
+    collected_by: "Research lead (human); the model was not present"
+    honesty_annexes:
+      - "8 participants, all existing customers — no first-time users, so onboarding failures are invisible to this batch."
+      - "Recruited from support-ticket openers, which over-samples people already having trouble."
+      - "Single session per participant; no learning-effect control."
+      - "The moderator knew the hypotheses, so first-click coding is not blind."

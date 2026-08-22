@@ -1,0 +1,319 @@
+name: CI
+
+# Runs the LLM-free U1-U9 registry validator over every registry in the
+# repo, and self-tests that each load-bearing rule still fires. A rule
+# nobody exercises is a rule that quietly stopped working: the four rules
+# this skill claims are structural are exactly the ones a refactor could
+# turn into no-ops without any test noticing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate-registries:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # U4 diffs a registry against its baseline commit; a shallow
+          # clone has no such commit to reach.
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r skill/ux-mizan/scripts/requirements.txt
+
+      - name: Resolve the U4 append-only baseline
+        id: baseline
+        run: |
+          set -e
+          # Echoed deliberately: the validator degrades gracefully when a
+          # baseline cannot be read, and a skipped check that prints
+          # nothing is indistinguishable from a passing one.
+          if [ -n "${{ github.base_ref }}" ]; then
+            base="origin/${{ github.base_ref }}"
+          else
+            base="$(git rev-parse HEAD^ 2>/dev/null || true)"
+          fi
+          if [ -n "$base" ] && git rev-parse --verify --quiet "$base^{commit}" >/dev/null; then
+            echo "base=$base" >> "$GITHUB_OUTPUT"
+            echo "U4 baseline: $base ($(git rev-parse --short "$base"))"
+          else
+            echo "base=" >> "$GITHUB_OUTPUT"
+            echo "::warning::No baseline commit reachable — U4 (append-only) did NOT run."
+          fi
+
+      - name: Validate every registry (U1-U10, U4 against the baseline)
+        run: |
+          set -e
+          base="${{ steps.baseline.outputs.base }}"
+          found=0
+          while IFS= read -r f; do
+            found=1
+            rel="${f#./}"
+            # --strict only for the worked examples, whose job is to MODEL
+            # a finished registry. The skeletons under skill/ and templates/
+            # legitimately warn (no baseline yet, no owner yet) because they
+            # are blank forms; blocking on that would force fake numbers into
+            # a template, which is the opposite of the honesty-annex rule.
+            # And elsewhere a warning the maintainer has not acted on should
+            # not block an unrelated PR — a warning that blocks is just a
+            # rule with a softer name.
+            strict=""
+            case "$rel" in
+              examples/*) strict="--strict" ;;
+            esac
+            echo "::group::$rel ${strict:-(advisory)}"
+            if [ -n "$base" ]; then
+              python skill/ux-mizan/scripts/ux_validate.py $strict --against "$base" "$rel"
+            else
+              python skill/ux-mizan/scripts/ux_validate.py $strict "$rel"
+            fi
+            echo "::endgroup::"
+          done < <(find . -path ./.git -prune -o -name '*ux-registry*.y*ml' -print)
+          if [ "$found" -eq 0 ]; then
+            echo "No registry files found to validate." >&2
+            exit 1
+          fi
+
+      - name: Self-test — U1 must reject a [K] the model gave itself
+        run: |
+          set -e
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.1"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "navigational-multiscreen"
+              priority_weight: 1.0
+              frequency: 1.0
+              applicable_metrics: [lostness]
+              baseline: {values: {lostness: 0.4}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "flow-level"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "K"
+              refutation_condition: "L < 0.3 refutes"
+              metric: {name: lostness, kind: behavioural, instrument: "telemetry"}
+              min_n: {n: 40, decision_rule: "40 sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 0.5
+              status: "open"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U1: finding UX-001 is at \[K\] with no evidence_artifact_id" \
+            || { echo "FAIL: U1 did not fire on a [K] with no artifact" >&2; exit 1; }
+          echo "$out" | grep -q "U1: finding UX-001 is at \[K\] with source_provenance" \
+            || { echo "FAIL: U1 did not fire on model-side provenance" >&2; exit 1; }
+          echo "OK: U1 holds the [K] promotion."
+
+      - name: Self-test — U2/U3/U6 must fire on the shapes they exist for
+        run: |
+          set -e
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.1"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "single-canvas-tool"
+              priority_weight: 0.5
+              frequency: 2.0
+              applicable_metrics: [lostness, task_success]
+              baseline: {values: {task_success: 0.5}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              finding_type: "component-contributing"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "H"
+              refutation_condition: "x"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              failure_magnitude: 0.5
+              severity: 9.9
+              status: "open"
+              owner: "fe"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          # U6: a single-canvas tool does not switch lostness on
+          echo "$out" | grep -q "U6:" || { echo "FAIL: U6 did not gate the metric matrix" >&2; exit 1; }
+          # U2: a component finding with no flow to hang off
+          echo "$out" | grep -q "U2:" || { echo "FAIL: U2 did not enforce flow primacy" >&2; exit 1; }
+          echo "OK: U2 and U6 fired."
+
+      - name: Self-test — U3 must recompute severity and reject the mismatch
+        run: |
+          set -e
+          # 0.5 x 0.5 x 2.0 = 0.5, not 9.9. This is the rule that stops the
+          # model re-ranking the backlog by writing a bigger number.
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.1"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "single-canvas-tool"
+              priority_weight: 0.5
+              frequency: 2.0
+              applicable_metrics: [task_success]
+              baseline: {values: {task_success: 0.5}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "flow-level"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "H"
+              refutation_condition: "x refutes"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 9.9
+              status: "open"
+              owner: "fe"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U3: finding UX-001 severity" \
+            || { echo "FAIL: U3 accepted a severity that does not match the formula" >&2; exit 1; }
+          echo "OK: U3 recomputed severity and rejected the mismatch."
+
+      - name: Self-test — U4 must catch a deleted finding and a resurrected [R]
+        run: |
+          set -e
+          reg="examples/ux-registry.example.yaml"
+          cp "$reg" /tmp/reg.bak
+          python - <<'PY'
+          import re
+          p = "examples/ux-registry.example.yaml"
+          s = open(p, encoding="utf-8").read()
+          # drop the refuted finding entirely — exactly what "for cleanliness" looks like
+          s = re.sub(r'(?ms)^  - finding_id: "UX-004".*?(?=^evidence_artifacts:)', "", s)
+          open(p, "w", encoding="utf-8").write(s)
+          PY
+          out="$(python skill/ux-mizan/scripts/ux_validate.py --against HEAD "$reg" || true)"
+          cp /tmp/reg.bak "$reg"
+          echo "$out"
+          echo "$out" | grep -q "U4:" || { echo "FAIL: U4 did not fire on a deleted [R] finding" >&2; exit 1; }
+          echo "OK: U4 caught the deletion."
+
+      - name: Self-test — the warning channel warns without blocking
+        run: |
+          set -e
+          # A warning that blocks is a rule; a rule that cannot block is
+          # decoration. The channel has to be genuinely two-valued.
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.1"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "navigational-multiscreen"
+              priority_weight: 1.0
+              frequency: 1.0
+              applicable_metrics: [task_success]
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "component-contributing"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "H"
+              refutation_condition: "x refutes"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 0.5
+              status: "open"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp")"   # must exit 0
+          echo "$out"
+          echo "$out" | grep -q "W3:" || { echo "FAIL: W3 did not warn about the missing baseline" >&2; exit 1; }
+          echo "$out" | grep -q "W4:" || { echo "FAIL: W4 did not warn about the ownerless finding" >&2; exit 1; }
+          if python skill/ux-mizan/scripts/ux_validate.py --strict "$tmp"; then
+            echo "FAIL: --strict did not promote warnings to failures" >&2
+            exit 1
+          fi
+          echo "OK: warnings warn by default and fail under --strict."
+
+      - name: Self-test — U10 must reject a fix that skipped the self-check
+        run: |
+          set -e
+          # Risk #1 is the one this skill can spread rather than merely
+          # miss, so the check that guards it has to be exercised.
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.3"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "navigational-multiscreen"
+              priority_weight: 1.0
+              frequency: 1.0
+              applicable_metrics: [task_success]
+              baseline: {values: {task_success: 0.5}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "flow-level"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "H"
+              refutation_condition: "x refutes"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 0.5
+              status: "open"
+              owner: "fe"
+              fix: "redesign the navigation"
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U10:" || { echo "FAIL: U10 did not fire on an unanswered fix" >&2; exit 1; }
+          echo "OK: U10 holds a redesign to its own self-check."
+
+      - name: Self-test — lostness stays undefined where it is undefined
+        run: |
+          set -e
+          python - <<'PY'
+          import sys
+          sys.path.insert(0, "skill/ux-mizan/scripts")
+          from lostness import lostness
+          # A session that visited fewer distinct screens than the canonical
+          # path never had a completion to be lost on the way to. The formula
+          # still returns a number there; that number is not lostness.
+          assert lostness(3, 3, 4) is None, "R > N must be undefined, not a number"
+          assert lostness(4, 3, 2) is None, "N > S is impossible input"
+          value = lostness(4, 5, 4)
+          assert 0 <= value <= 1, f"in-range inputs must stay in 0-1, got {value}"
+          print(f"OK: L={value:.3f} in range; degenerate inputs return None.")
+          PY
+
+  skill-package-in-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: ux-mizan.skill must match skill/ux-mizan/
+        run: python tools/build_skill.py --check

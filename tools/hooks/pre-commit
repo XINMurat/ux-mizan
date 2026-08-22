@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# ux-mizan pre-commit hook — runs the U1-U9 validator on staged registries.
+# ux-mizan pre-commit kancası — hazırlanmış registry dosyalarını U1-U9 denetler.
+#
+# Install / Kurulum:
+#   cp tools/hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+# or / veya:
+#   git config core.hooksPath tools/hooks
+#
+# It validates any staged file matching *ux-registry*.yaml (and .yml),
+# including the append-only (U4) check against HEAD.
+set -euo pipefail
+
+LANG_OPT="${UX_MIZAN_LANG:-en}"   # export UX_MIZAN_LANG=tr for Turkish messages
+PYTHON="${PYTHON:-python}"
+here="$(git rev-parse --show-toplevel)"
+validator="$here/skill/ux-mizan/scripts/ux_validate.py"
+
+mapfile -t files < <(git diff --cached --name-only --diff-filter=ACM \
+  | grep -Ei 'ux-registry.*\.ya?ml$' || true)
+
+if [ "${#files[@]}" -eq 0 ]; then
+  exit 0
+fi
+
+fail=0
+for f in "${files[@]}"; do
+  [ -f "$here/$f" ] || continue
+  echo "ux-mizan: validating $f"
+  # HEAD may not have the file yet (a new registry) — --against is best-effort.
+  if git cat-file -e "HEAD:$f" 2>/dev/null; then
+    "$PYTHON" "$validator" --lang "$LANG_OPT" --against HEAD "$here/$f" || fail=1
+  else
+    "$PYTHON" "$validator" --lang "$LANG_OPT" "$here/$f" || fail=1
+  fi
+done
+
+if [ "$fail" -ne 0 ]; then
+  echo ""
+  echo "ux-mizan: commit blocked — registry violates a hard rule (U1-U9)."
+  echo "ux-mizan: commit engellendi — registry bir sert kuralı (U1-U9) ihlal ediyor."
+  echo "       Fix the entry, or if this is a deliberate exception, document it."
+  exit 1
+fi
+exit 0
