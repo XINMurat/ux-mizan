@@ -241,6 +241,97 @@ hypotheses:
     history:
       - { date: "2026-08-22", event: "preregistered v1. NOT RUN — examples/portability-across-hosts.md currently contains the design only, and says so." }
 
+  - id: "H-UX006"
+    version: 1
+    tier: "H"
+    status: "preregistered"
+    preregistered: "2026-08-22"
+    title: "Subdividing [KKE] by reason makes the registry answerable, without forking the family vocabulary"
+    formal: >
+      Recording WHY an entry is [KKE] -- a missing control, missing
+      independence, missing data, or missing validation -- in a
+      `kke_kind` FIELD rather than in new tags keeps the six-tier
+      vocabulary shared across the family while making "why is this KKE?"
+      machine-answerable.
+    origin: >
+      External review (ChatGPT, 2026-08-22) proposed [KKE-C]/[KKE-I]/
+      [KKE-D]/[KKE-V] as separate tags. The observation is right and the
+      form is not: the six tags are the one thing four skills share, and
+      forking them inside one member costs exactly what makes them a
+      family. A field carries the same information and travels.
+    metric:
+      name: "kke_reason_recoverable"
+      instrument: "count of [KKE] entries whose reason can be recovered without reading prose"
+    arbiter:
+      class: "runtime"
+      who: "a validator check that every [KKE] entry carries a kke_kind"
+      independent_of_author: true
+      latency: "seconds"
+      calibration: "Against the current state, where the reason is recoverable from prose only."
+    threshold:
+      support: "100% of [KKE] entries carry a machine-readable reason"
+      refute: "the field is added and, after 3 real registries, 0 readers or tools use it"
+    refutation: >
+      If nothing ever reads the field, it is bookkeeping that costs a line
+      per entry and buys nothing -- drop it and say so.
+    two_sided: >
+      Support: the distinction is real and worth a field. Refute: [KKE]
+      was already precise enough in context, and the subdivision was
+      taxonomy for its own sake.
+    prior_art:
+      - "Mizan already carries both senses of KKE without distinguishing them: R2 (missing baseline) is missing DATA, R8 (author arbiter) is missing INDEPENDENCE. So the distinction belongs upstream in Mizan, not as a local fork here."
+    confounds:
+      - "the reviewer and the author both find taxonomies satisfying; neither has a user asking for this yet"
+    cost: "one schema field, one validator check"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1 from external review. NOT implemented -- deliberately queued behind evidence that anyone needs it (see the over-engineering risk, H-UX007)." }
+
+  - id: "H-UX007"
+    version: 1
+    tier: "KKE"
+    status: "open"
+    preregistered: "2026-08-22"
+    title: "The method costs more to operate than the problems it finds are worth"
+    formal: >
+      The concept count a first-time user must traverse before a single
+      finding exists -- five gates, ten rules, six app types, two modes,
+      four scripts, a two-table registry -- makes the audit itself more
+      expensive than acting on the defects it produces.
+    origin: >
+      External review (ChatGPT, 2026-08-22), and it is the strongest
+      criticism the project has received. Supporting evidence from the
+      project's own first run: the path from "audit this app" to the first
+      written finding took two gate lockings, two premise revisions and a
+      Gate-2 round.
+    metric:
+      name: "turns_to_first_finding"
+      instrument: "count of human exchanges from the audit request to the first finding written to a registry"
+    arbiter:
+      class: "instrument"
+      who: "the session transcript and the registry's own commit history"
+      independent_of_author: false
+      latency: "one audit"
+      calibration: "Against a heuristic review with no method, which produces a finding in 1 exchange and cannot tier it."
+    threshold:
+      support: "> 10 exchanges to the first finding on a second, independent application"
+      refute: "<= 5 exchanges, or the user reports the gates were worth it"
+    refutation: >
+      If a second app reaches its first finding in five exchanges, the cost
+      is front-loaded onto Gate 0 rather than distributed, and the fix is
+      documentation rather than architecture.
+    two_sided: >
+      Support: the method needs a shorter honest path. Refute: the cost is
+      Gate 0 being asked once, which is the price of not auditing a
+      guessed purpose.
+    prior_art:
+      - "The lite/full split and the soft-gate defaults already exist as the designed mitigation; this hypothesis is about whether they are enough."
+    confounds:
+      - "the first run also DEBUGGED the tool, which a normal audit would not do; the exchange count is inflated by defect fixing"
+      - "the author is the only operator so far, and knows every gate by heart"
+    cost: "no extra cost; it is a count over runs that happen anyway"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1. Carried at [KKE] rather than [H]: the count from run #1 is contaminated by the tool debugging that ran alongside it, which is exactly the control that is missing." }
+
 experiments: []
 
 results: []

@@ -184,6 +184,32 @@ alone means nothing. Measure the current build before any redesign. And a
 high L may not be lostness at all — the task may simply be many-stepped;
 hunt the alternative explanation for a bad result as hard as for a good one.
 
+## The positive-control rule
+
+**A new detector is run against a case known to be positive before it is
+trusted on unknown ones.** This is the scientific positive control, applied
+to static analysis, and it is here rather than only in the contributor
+docs because it is the rule this project has broken most often.
+
+Every structural check shipped in this skill has, at least once, silently
+under-reported: a regex whose trailing `` could never match, an overlay
+counted as a collapse, a colour test that missed a bare utility class. All
+three read the same way from outside — **a clean codebase.** A false
+positive argues with you; a false negative agrees with you, which is why
+it survives review.
+
+So when you add or change a signal:
+
+1. Find a file where the problem is known to exist.
+2. Run the check and confirm it fires there.
+3. Only then trust it on files where you do not know the answer.
+4. Report the before/after on that real file, not on a synthetic fixture —
+   a fixture is written to match the regex you just wrote.
+
+The same rule applies to a clean scan result. "No signals" never means "no
+problems"; it means the checks that ran found nothing, and it should be
+reported in those words.
+
 ## First run = self-validation
 
 The first thing this skill does is audit ONE real application end to end.
