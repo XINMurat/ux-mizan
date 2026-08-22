@@ -9,7 +9,8 @@
 📚 **Docs:** [ux-mizan.github.io](https://xinmurat.github.io/ux-mizan/) ·
 **Family:** [Mizan](https://github.com/XINMurat/Mizan) ·
 [Kıyas](https://github.com/XINMurat/Kiyas) ·
-[İskele](https://github.com/XINMurat/Iskele)
+[İskele](https://github.com/XINMurat/Iskele) ·
+[**all four**](https://xinmurat.github.io/)
 
 Tiers / Katmanlar: **[K]** proven/kanıtlanmış · **[H]** plausible hypothesis/makul hipotez ·
 **[S]** speculative/spekülatif · **[R]** refuted/reddedildi (never deleted / silinmez) ·
