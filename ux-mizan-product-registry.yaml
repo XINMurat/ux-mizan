@@ -1,0 +1,246 @@
+# =====================================================================
+# ux-mizan Product Registry — ux-mizan-product-registry.yaml
+#
+# This file is NOT a UX registry. It is a MIZAN registry, in Mizan's
+# schema, holding the design hypotheses of ux-mizan itself.
+#
+# Why the other family's format: the claims here are about a method, not
+# about an application's flows, so they have thresholds and arbiters
+# rather than flows and severities. Using ux-mizan's own schema would
+# have meant inventing a fake flow for every claim — which is the
+# category error the metric matrix exists to prevent, committed by the
+# tool's own authors.
+#
+# It is validated by MIZAN's validator, not this repo's. CI fetches it
+# from github.com/XINMurat/Mizan and warns rather than fails when the
+# fetch is unavailable — a dependency on another repo's network
+# availability must not be able to redden this one's build.
+#
+# Every entry below was already written in prose (DECISIONS.md,
+# SELF-VALIDATION.md). Putting them here makes them checkable, which is
+# this family's whole argument: the scripted part is the part that
+# travels.
+# =====================================================================
+
+registry:
+  project: "ux-mizan"
+  owner: "XINMurat"
+  schema_version: "1.4"
+  methodology: "mizan-v2.1"
+  created: "2026-08-22"
+  notes: >
+    Design hypotheses of the ux-mizan skill. The skill's status line
+    ("v0.3 [H]/[KKE]") is the summary of this file: one self-validation
+    run, one refuted decision, and no behavioural evidence yet.
+
+hypotheses:
+  - id: "H-UX001"
+    version: 1
+    tier: "R"
+    status: "closed"
+    preregistered: "2026-08-22"
+    title: "Five app_type categories are enough to gate the metric battery"
+    formal: >
+      Five categories (navigational-multiscreen, form-heavy-transactional,
+      single-canvas-tool, b2b-internal-dashboard, content-consumption)
+      can classify any real application's flows without any flow needing
+      the union of two categories' metric sets.
+    origin: "design session, before any real application was audited"
+    metric:
+      name: "union_required"
+      instrument: "classification attempt on a real app's flows, recorded in DECISIONS.md §3"
+    arbiter:
+      class: "author"
+      who: "the skill's author classifying the fixture's flows"
+      independent_of_author: false
+      latency: "minutes"
+      calibration: >
+        None. This is a categorical judgement by the person who wrote the
+        taxonomy, which is why the entry carries a permanent KKE even
+        though the outcome was negative — a refutation reached by the
+        author is still author-arbitrated.
+    threshold:
+      support: "0 flows require a union across a full application"
+      refute: ">= 1 flow requires a union"
+    refutation: >
+      One flow that cannot be classified without borrowing metrics from
+      two categories refutes the taxonomy as specified.
+    two_sided: >
+      Support: the taxonomy is complete enough to ship. Refute: it is
+      missing a category, and the missing one is named by the flow that
+      broke it.
+    preregistered_prediction: "Author expected the five to hold for at least a handful of apps."
+    prior_art:
+      - "No known relatives — app-type taxonomies in UX literature classify products, not per-flow metric applicability."
+    confounds:
+      - "author also chose which flows to model, so a convenient flow set could have hidden the gap"
+    cost: "one classification pass"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1 with its refutation condition" }
+      - { date: "2026-08-22", event: "REFUTED on run #1: a server-enforced learning sequence needed read_completion + scroll_depth from one category and task_success + step_abandonment from another. Kept at [R]; superseded by H-UX002." }
+
+  - id: "H-UX002"
+    version: 1
+    tier: "H"
+    status: "preregistered"
+    preregistered: "2026-08-22"
+    title: "Six app_type categories, with guided-sequence added"
+    formal: >
+      Adding `guided-sequence` (server-enforced order; lostness and
+      nav_depth off; resume_rate on) closes the gap that refuted
+      H-UX001, and six categories classify the next applications without
+      a union.
+    origin: "the refutation of H-UX001"
+    metric:
+      name: "union_required"
+      instrument: "classification attempt on each newly audited application"
+    arbiter:
+      class: "author"
+      who: "whoever classifies the next app's flows"
+      independent_of_author: false
+      latency: "minutes"
+      calibration: "None; same limitation as H-UX001."
+    threshold:
+      support: "3 consecutive applications classified with no union"
+      refute: ">= 1 flow in any application requires a union"
+    refutation: >
+      The next app that needs a union refutes this version too. Six is not
+      claimed to be the right number; it is the number that survived one
+      application.
+    two_sided: >
+      Support: the taxonomy generalises past its first fixture. Refute:
+      the sixth category was a patch for one app, not a category.
+    prior_art:
+      - "H-UX001 (refuted), same repo"
+    confounds:
+      - "the same author both names the new category and judges whether the next app fits it"
+    cost: "one classification pass per app"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1 after H-UX001 was refuted" }
+
+  - id: "H-UX003"
+    version: 1
+    tier: "H"
+    status: "preregistered"
+    preregistered: "2026-08-22"
+    title: "The Lite/Full boundary sits near 300 completions per flow per month"
+    formal: >
+      Below roughly 300 completions per flow per month, passive telemetry
+      cannot reach a preregistered decision rule inside four weeks, while
+      5-8 moderated sessions can decide the same question in one
+      afternoon. Above it, passive telemetry becomes the cheaper primary
+      instrument.
+    origin: "design estimate; no measurement behind the number"
+    metric:
+      name: "weeks_to_decision"
+      instrument: "elapsed time from instrumentation to the first tier flip, recorded per flow"
+    arbiter:
+      class: "instrument"
+      who: "the registry's own dated history: preregistration date vs. the date of the first [H]->[K] or [H]->[R] flip"
+      independent_of_author: true
+      latency: "weeks"
+      calibration: >
+        Compared against the four-week window the mode split assumes, not
+        against any external benchmark.
+    threshold:
+      support: "a flow above 300/month decides within 4 weeks AND a flow below it does not"
+      refute: "a flow above 300/month fails to decide in 4 weeks, or one below it decides"
+    refutation: >
+      Either half failing moves the boundary. The number is a design
+      estimate and is expected to move.
+    two_sided: >
+      Support: the mode split is calibrated. Refute: the threshold is
+      wrong, and the observed decision times say in which direction.
+    prior_art:
+      - "No known relatives with a published number; the practice of preferring moderated sessions at low N is standard UX-research advice without a stated cut-off."
+    confounds:
+      - "effect size interacts with N; a large effect decides fast at low volume and would flatter the boundary"
+      - "instrumentation quality: a silently broken event pipeline looks like insufficient volume"
+    cost: "no extra cost; it is bookkeeping on runs that happen anyway"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1; unmeasured, stated as [H] in SKILL.md" }
+
+  - id: "H-UX004"
+    version: 1
+    tier: "KKE"
+    status: "open"
+    preregistered: "2026-08-22"
+    title: "Structural traces of arrangement license behavioural hypotheses worth testing"
+    formal: >
+      The rendering shapes layout_signals.py detects (items rendered
+      all-open, a current item marked by colour alone, a screen with no
+      headings) predict behavioural failures often enough that the
+      resulting hypotheses survive measurement more than half the time.
+    origin: "user feedback that a screen 'reads as nested sequential text with no separation'"
+    metric:
+      name: "signal_hit_rate"
+      instrument: "share of layout-signal-derived findings that are SUPPORTED rather than refuted in moderated sessions"
+    arbiter:
+      class: "third_party"
+      who: "moderated-session participants, coded by a moderator who is not the tool's author"
+      independent_of_author: false
+      latency: "one session round"
+      calibration: >
+        Against the hit rate of walkthrough-derived findings in the same
+        round, so the comparison is within-study rather than against a
+        remembered baseline.
+    threshold:
+      support: ">= 50% of layout-signal findings supported"
+      refute: "< 25% supported"
+    refutation: >
+      A hit rate below a quarter means the signals point at shapes that do
+      not cost users anything, and the script should be demoted to a
+      curiosity or removed.
+    two_sided: >
+      Support: a model can usefully see arrangement in source. Refute:
+      arrangement traces are noise, and the [KKE] tier was generous.
+    prior_art:
+      - "Heuristic evaluation literature: structural conformance checks predict some usability problems and miss others; no published hit rate for this specific signal set."
+    confounds:
+      - "the same person wrote the signals and the findings derived from them"
+      - "signals were tuned ON the fixture that motivated them, so the first app's hit rate is optimistically biased"
+    cost: "no extra cost; rides on session rounds that happen anyway"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1. Note: the script produced BOTH false negatives and false positives on its first real scan, all fixed; that is a defect record, not evidence about this hypothesis." }
+
+  - id: "H-UX005"
+    version: 1
+    tier: "KKE"
+    status: "open"
+    preregistered: "2026-08-22"
+    title: "Putting the rules in a script makes them survive a hostile host"
+    formal: >
+      A registry produced under a host whose instructions contradict the
+      method (brevity caps, 'be positive', pinned language) still
+      satisfies U1-U10, because the validator does not read the host's
+      instructions.
+    origin: "inherited claim from Mizan's operating-assumptions section"
+    metric:
+      name: "rules_surviving"
+      instrument: "examples/portability-across-hosts.md — the fixture run, once it exists"
+    arbiter:
+      class: "runtime"
+      who: "ux_validate.py exit code on the registry produced under each fixture host"
+      independent_of_author: true
+      latency: "minutes"
+      calibration: "The same validator run on a registry produced under a neutral host."
+    threshold:
+      support: "10 of 10 rules (U1-U10) still enforced under the hostile host"
+      refute: ">= 1 of U1-U10 silently unenforced under the hostile host"
+    refutation: >
+      A rule that the host can make disappear was never scripted enforcement;
+      it was prose with a script-shaped comment next to it.
+    two_sided: >
+      Support: the family's central claim holds for this member. Refute:
+      the claim is inherited rather than earned, and SKILL.md must say so.
+    prior_art:
+      - "Mizan's examples/portability-across-hosts.md, which runs this test for the sibling skill"
+    confounds:
+      - "the hostile fixture is written by the same author who knows which rules would survive"
+    cost: "an afternoon; three fixture files and two runs"
+    history:
+      - { date: "2026-08-22", event: "preregistered v1. NOT RUN — examples/portability-across-hosts.md currently contains the design only, and says so." }
+
+experiments: []
+
+results: []

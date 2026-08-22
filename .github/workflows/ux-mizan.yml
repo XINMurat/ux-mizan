@@ -308,6 +308,30 @@ jobs:
           print(f"OK: L={value:.3f} in range; degenerate inputs return None.")
           PY
 
+  product-registry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - run: pip install pyyaml
+      - name: Validate the product registry with MIZAN's validator
+        run: |
+          set -e
+          # The skill's own design hypotheses are a Mizan registry, not a
+          # ux-mizan one -- they have thresholds and arbiters, not flows.
+          # So the sibling's validator judges them. A network failure must
+          # not redden this build: an unavailable dependency is not a
+          # violation, and a check that cannot run says so out loud rather
+          # than passing silently.
+          url="https://raw.githubusercontent.com/XINMurat/Mizan/main/tools/mizan_validate.py"
+          if curl -fsSL "$url" -o /tmp/mizan_validate.py; then
+            python /tmp/mizan_validate.py --strict ux-mizan-product-registry.yaml
+          else
+            echo "::warning::Could not fetch Mizan's validator — the product registry was NOT checked."
+          fi
+
   skill-package-in-sync:
     runs-on: ubuntu-latest
     steps:

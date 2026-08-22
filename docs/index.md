@@ -54,7 +54,9 @@ automatic instrument produce `[K]` (**Layer B**).
 
 - [Quickstart](QUICKSTART.md) — install, first audit, first validation
 - [Usage guide (EN)](en/usage-guide.md) — gates, modes, metrics, worked flow
-- [Kullanım kılavuzu (TR)](tr/kullanim-kilavuzu.md)
+- [Reference (EN)](en/reference.md) — every rule, every metric, every file
+- [Project instructions (EN)](en/project-instructions.md) — paste into a Claude Project
+- [Kullanım kılavuzu (TR)](tr/kullanim-kilavuzu.md) · [Referans](tr/referans.md) · [Proje talimatı](tr/proje-talimati.md)
 
 ---
 
@@ -92,5 +94,7 @@ yalnızca gerçek kullanıcıdan ya da otomatik bir hakemden gelir
 ### Sırada
 
 - [Hızlı başlangıç](QUICKSTART.md)
-- [Kullanım kılavuzu](tr/kullanim-kilavuzu.md)
+- [Kullanım kılavuzu](tr/kullanim-kilavuzu.md) — kurulum, kapılar, modlar, metrikler
+- [Referans](tr/referans.md) — her kural, her metrik, her dosya
+- [Proje talimatı](tr/proje-talimati.md) — Claude Project'e yapıştırılacak metin
 - [Usage guide (EN)](en/usage-guide.md)
