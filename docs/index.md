@@ -12,7 +12,7 @@ description: "A Claude skill that audits experience with the same discipline Miz
 [Mizan](https://github.com/XINMurat/Mizan) ·
 [Kıyas](https://github.com/XINMurat/Kiyas) ·
 [İskele](https://github.com/XINMurat/Iskele) ·
-[**the family**](https://xinmurat.github.io/)
+[**the family · aile**](https://xinmurat.github.io/)
 
 > **Status: v0.2 `[H]` / `[KKE]`.** One self-validation run has happened.
 > It tested the Layer-A scripts and refuted one design decision; the gates,
