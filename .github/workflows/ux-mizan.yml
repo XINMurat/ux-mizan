@@ -415,3 +415,50 @@ jobs:
           python-version: "3.12"
       - name: ux-mizan.skill must match skill/ux-mizan/
         run: python tools/build_skill.py --check
+
+  skill-scan:
+    # A skill is code plus instructions that load into an agent's context and
+    # run with the user's permissions, so this repo ships an attack surface,
+    # not just a document. This job scans skill/ux-mizan with skillvet
+    # (github.com/V3r7ig0/skillvet) and fails on any high/critical finding.
+    #
+    # skillvet is pinned to a commit, not a branch: an unpinned security
+    # scanner is itself a supply-chain hole, and a rule set that changes
+    # under us turns a green run into a claim we cannot reproduce. Bumping
+    # the pin is a deliberate commit, and the diff in findings is the point
+    # of the bump.
+    #
+    # Only skills/skillvet is checked out. The upstream repo also carries 44
+    # deliberately malicious benchmark fixtures; they are inert test data,
+    # but there is no reason to put them on a runner, and endpoint AV
+    # heuristics flag them on sight.
+    #
+    # The baseline suppresses one reviewed false positive: skillvet reads
+    # "measures being lost without asking the user" in SKILL.md as an
+    # instruction to act covertly. Its fingerprint is rule+file+snippet, so
+    # if that sentence is ever reworded the suppression lapses and the
+    # finding comes back for a fresh look — which is the behaviour we want.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Fetch the pinned scanner (scanner only, no benchmark corpus)
+        run: |
+          set -e
+          git clone --quiet --filter=blob:none --no-checkout \n            https://github.com/V3r7ig0/skillvet.git /tmp/skillvet
+          git -C /tmp/skillvet sparse-checkout set --no-cone skills/skillvet
+          git -C /tmp/skillvet checkout --quiet 7db0c4d30abe05ed2d6f3544e262da5d79af25b5
+          echo "skillvet pinned at $(git -C /tmp/skillvet rev-parse --short HEAD)"
+
+      - name: Scan skill/ux-mizan
+        env:
+          # The scanner prints a U+2192 in its verdict line; without this it
+          # dies on any runner whose stdout is not UTF-8.
+          PYTHONIOENCODING: utf-8
+        run: |
+          set -e
+          python /tmp/skillvet/skills/skillvet/scripts/scan_skill.py \n            skill/ux-mizan --fail-on high \n            --baseline .github/skillvet-baseline.json
