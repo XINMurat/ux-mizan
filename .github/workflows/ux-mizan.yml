@@ -412,6 +412,69 @@ jobs:
             echo "::warning::Could not fetch Mizan's validator — the product registry was NOT checked."
           fi
 
+      - name: The declared schema version agrees with the schema itself
+        run: |
+          set -e
+          # reimagine-it keeps five host manifests honest by refusing to build
+          # when they disagree on a version. Same idea, one repo: the version
+          # is stated once in the schema's own banner, echoed in SKILL.md
+          # frontmatter, and CI refuses to let the two drift. A version that
+          # lives in two places is a version that is wrong in one of them.
+          python - <<'PY'
+          import io, re, sys, yaml
+          schema = io.open("skill/ux-mizan/schemas/ux-registry.yaml", encoding="utf-8").read()
+          banner = re.search(r"Schema v([0-9]+\.[0-9]+)", schema)
+          if not banner:
+              print("FAIL: the schema has no 'Schema vX.Y' banner to be pinned to", file=sys.stderr)
+              sys.exit(1)
+          skill = io.open("skill/ux-mizan/SKILL.md", encoding="utf-8").read()
+          fm = yaml.safe_load(skill[4:skill.index(chr(10) + "---" + chr(10), 4)])
+          declared = str((fm.get("metadata") or {}).get("schema_version") or "")
+          if declared != banner.group(1):
+              print(f"FAIL: SKILL.md declares schema_version {declared!r} but the schema banner says {banner.group(1)!r}", file=sys.stderr)
+              sys.exit(1)
+          print(f"ok  schema v{declared} agrees in both places")
+          PY
+
+      - name: The blank form carries none of the worked example's content
+        run: |
+          set -e
+          # An equality check (templates/ vs schemas/) catches drift. It cannot
+          # catch the opposite leak: someone edits the blank form while looking
+          # at the filled one and the shipped template goes out carrying a real
+          # project's names. That failure is silent -- the template still parses,
+          # still validates, and quietly hands the next user someone else's data.
+          #
+          # Borrowed from Kayforkind/reimagine-it, whose CI asserts that one
+          # example pack contains none of another's motifs. Same shape, this
+          # repo's axis: proper nouns travel, blank forms must not.
+          #
+          # Currently clean -- this is a guard, not a repair.
+          python - <<'PY'
+          import io, re, sys
+          tpl = io.open("templates/ux-registry.yaml", encoding="utf-8").read()
+          ex = io.open("examples/ux-registry.example.yaml", encoding="utf-8").read()
+
+          # Distinctive names from the worked example: the project/product it
+          # audits, plus any capitalised multi-word proper noun it introduces.
+          names = set()
+          for pat in (r'project: *"?([^"\n]{3,40})', r'product: *"?([^"\n]{3,40})'):
+              names |= {m.strip().strip('"') for m in re.findall(pat, ex)}
+          names = {n for n in names if len(n) > 3 and not n.startswith("<")}
+          if not names:
+              print("no project/product name in the worked example to check against")
+              sys.exit(0)
+
+          leaked = sorted(n for n in names if n in tpl)
+          if leaked:
+              print("FAIL: the blank form carries the worked example's names:", file=sys.stderr)
+              for n in leaked:
+                  print(f"  - {n!r} appears in templates/ux-registry.yaml", file=sys.stderr)
+              print("A template is a form, not a copy of somebody's filled-in registry.", file=sys.stderr)
+              sys.exit(1)
+          print(f"ok  blank form carries none of {sorted(names)}")
+          PY
+
   skill-package-in-sync:
     runs-on: ubuntu-latest
     steps:

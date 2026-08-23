@@ -1,6 +1,10 @@
 ---
 name: ux-mizan
 description: Evidence-tiered UX auditing for applications — finds where users get lost or confused, and builds the measuring rig that can prove it. Use whenever someone wants a UX audit, usability review, or interface critique; wants to know why users get lost, drop off, or complain that an app is confusing; wants to measure usability (lostness, task success, first-click, rage/dead clicks, abandonment) or set up UX telemetry; wants an information-architecture or navigation review; wants a redesign gated by a diagnosis instead of taste; or wants to check whether an AI-generated interface is generic. Triggers include "UX denetimi", "kullanilabilirlik", "kullanicilar kayboluyor", "arayuz karisik", "neden birakiyorlar", "UX audit", "usability review", "IA review", "lostness", "why do users drop off". Sibling of mizan (audits claims), kiyas (generates ideas), iskele (structures projects) — this one audits experience. NOT for visual/brand design requests, copywriting, or building a UI from scratch.
+license: MIT
+metadata:
+  author: XINMurat
+  schema_version: "0.4"   # pinned to the schema banner by CI
 ---
 
 # ux-mizan — Evidence-Tiered UX Auditing
