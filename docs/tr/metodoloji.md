@@ -184,7 +184,7 @@ farklı bir soruya karşı koşturulduğu gerçeğini siler.
 dosyaya ekleyin. Sona saklamak, bir sonraki bağlam sıfırlamasında kaybetmek
 ve o ana kadar her turda bedelini ödemek demektir.
 
-Sert kuralların (U1–U10) tam listesi: [`referans.md`](referans.md).
+Sert kuralların (U1–U11) tam listesi: [`referans.md`](referans.md).
 
 ## 5. Walkthrough — Katman A şablonu
 

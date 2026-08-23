@@ -47,7 +47,7 @@ automatic instrument produce `[K]` (**Layer B**).
 - **Metrics gated by `app_type`.** Lostness on a single-canvas tool is a
   category error and fails validation. Six app types, each switching a
   metric *off* — a taxonomy that only adds is decoration.
-- **Rules in a script, not in prose.** `ux_validate.py` enforces U1–U9
+- **Rules in a script, not in prose.** `ux_validate.py` enforces U1–U11
   identically in every host. Whatever is enforced only by a paragraph is
   negotiable by the host's paragraphs.
 
@@ -88,7 +88,7 @@ yalnızca gerçek kullanıcıdan ya da otomatik bir hakemden gelir
 - **`app_type`'a kapılı metrikler.** Tek-tuval bir araçta lostness bir
   kategori hatasıdır ve doğrulamadan geçmez. Altı tip, her biri bir
   metriği *kapatarak* — yalnızca ekleyen taksonomi süslemedir.
-- **Kurallar betikte, düzyazıda değil.** `ux_validate.py` U1–U9'u her
+- **Kurallar betikte, düzyazıda değil.** `ux_validate.py` U1–U11'i her
   host'ta aynı şekilde uygular. Yalnızca bir paragrafla korunan şey,
   host'un paragraflarıyla pazarlık edilebilir.
 

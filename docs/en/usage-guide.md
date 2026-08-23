@@ -127,7 +127,7 @@ says *where*, never *why*; it is per flow, never global; and Smith's
 0.4/0.5 cut-offs come from hypertext studies and are not validated for
 your app type — compare against your own baseline.
 
-## The hard rules (U1–U9)
+## The hard rules (U1–U11)
 
 | rule | what it does |
 |---|---|
@@ -140,6 +140,8 @@ your app type — compare against your own baseline.
 | U7 | gate provenance; unlocked Gate 0 caps findings at `[H]` |
 | U8 | a measured baseline before any behavioural `[K]` |
 | U9 | a locked `min_n` and decision rule before `[K]` |
+| U10 | a proposed fix carries a homogenisation self-check — a redesign that never asked whether it is the generic default is the disease this skill diagnoses |
+| U11 | a `[KKE]` names *which* control is missing; "a control is missing" is not actionable until it says which |
 
 W1–W4 warn without blocking; `--strict` promotes them. CI runs strict,
 local runs do not — a tool that can only block teaches people to write

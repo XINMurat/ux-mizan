@@ -298,9 +298,9 @@ an audit, tiers in place, judgment gone.
 - `references/handoff.md` — Gate 3, the redesign and spec-handoff
   procedure, and what a two-model handoff can and cannot promise.
 - `schemas/ux-registry.yaml` — the two-table registry format and rules
-  U1–U9. Read the file at session start when one exists, APPEND rather
+  U1–U11. Read the file at session start when one exists, APPEND rather
   than overwrite, and enforce it with the validator, not by reading it.
-- `scripts/ux_validate.py` — U1–U9 without a model.
+- `scripts/ux_validate.py` — U1–U11 without a model.
 - `scripts/lostness.py` — per-flow lostness from a screen-visit log.
 - `scripts/structural_checks.py` — Layer-A proxies for React/TS: what is
   missing (states, feedback, labels, depth).

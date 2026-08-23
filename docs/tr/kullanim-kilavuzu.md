@@ -126,7 +126,7 @@ geçerlidir; *nerede*yi söyler, *neden*i söylemez; akış başınadır, global
 değil; ve 0,4/0,5 eşikleri hipertext çalışmalarından gelir, sizin
 uygulamanız için valide değildir.
 
-## Sert kurallar (U1–U9)
+## Sert kurallar (U1–U11)
 
 | kural | ne yapar |
 |---|---|
@@ -139,6 +139,8 @@ uygulamanız için valide değildir.
 | U7 | kapı provenance; Kapı 0 kilitli değilse tavan `[H]` |
 | U8 | davranışsal `[K]` öncesi ölçülmüş baseline şart |
 | U9 | `[K]` öncesi kilitli `min_n` ve karar kuralı |
+| U10 | önerilen düzeltme homojenleşme öz-kontrolü taşır — jenerik varsayılan mı diye sorulmamış bir redesign, bu skill'in teşhis ettiği hastalığın kendisidir |
+| U11 | `[KKE]` *hangi* kontrolün eksik olduğunu adlandırır; "kontrol eksik" hangisi denmeden eyleme dönüşmez |
 
 W1–W4 uyarıları bloke etmez; `--strict` onları hataya çevirir. CI strict
 koşar, yerel koşu koşmaz — yalnızca durdurabilen bir araç, insanlara onu
