@@ -247,11 +247,17 @@ jobs:
           echo "$out"
           echo "$out" | grep -q "W3:" || { echo "FAIL: W3 did not warn about the missing baseline" >&2; exit 1; }
           echo "$out" | grep -q "W4:" || { echo "FAIL: W4 did not warn about the ownerless finding" >&2; exit 1; }
-          if python skill/ux-mizan/scripts/ux_validate.py --strict "$tmp"; then
+          if strict_out="$(python skill/ux-mizan/scripts/ux_validate.py --strict "$tmp")"; then
             echo "FAIL: --strict did not promote warnings to failures" >&2
             exit 1
           fi
-          echo "OK: warnings warn by default and fail under --strict."
+          echo "$strict_out"
+          # Same finding both times, by name. A non-zero exit alone would let
+          # --strict "pass" this step while failing on some unrelated rule,
+          # which would prove nothing about the promotion path.
+          echo "$strict_out" | grep -q "W3:" || { echo "FAIL: --strict failed, but W3 is not what it promoted" >&2; exit 1; }
+          echo "$strict_out" | grep -q "W4:" || { echo "FAIL: --strict failed, but W4 is not what it promoted" >&2; exit 1; }
+          echo "OK: warnings warn by default and fail under --strict, on W3 and W4 both times."
 
       - name: Self-test — U10 must reject a fix that skipped the self-check
         run: |
