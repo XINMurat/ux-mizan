@@ -449,7 +449,7 @@ jobs:
       - name: Fetch the pinned scanner (scanner only, no benchmark corpus)
         run: |
           set -e
-          git clone --quiet --filter=blob:none --no-checkout \n            https://github.com/V3r7ig0/skillvet.git /tmp/skillvet
+          git clone --quiet --filter=blob:none --no-checkout https://github.com/V3r7ig0/skillvet.git /tmp/skillvet
           git -C /tmp/skillvet sparse-checkout set --no-cone skills/skillvet
           git -C /tmp/skillvet checkout --quiet 7db0c4d30abe05ed2d6f3544e262da5d79af25b5
           echo "skillvet pinned at $(git -C /tmp/skillvet rev-parse --short HEAD)"
@@ -461,4 +461,4 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: |
           set -e
-          python /tmp/skillvet/skills/skillvet/scripts/scan_skill.py \n            skill/ux-mizan --fail-on high \n            --baseline .github/skillvet-baseline.json
+          python /tmp/skillvet/skills/skillvet/scripts/scan_skill.py skill/ux-mizan --fail-on high --baseline .github/skillvet-baseline.json
