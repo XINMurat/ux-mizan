@@ -43,4 +43,18 @@ if [ "$fail" -ne 0 ]; then
   echo "       Fix the entry, or if this is a deliberate exception, document it."
   exit 1
 fi
+
+# --- leak gate -------------------------------------------------------------
+# Nothing published can carry a real name. The list lives in .forbidden-terms
+# (gitignored) -- with no list this is a no-op, so the hook stays usable by
+# anyone who has not set one up. This runs before the commit rather than in CI
+# because CI runs after the push, and a push to a public repository is the
+# publication itself.
+if ! "$PYTHON" "$here/tools/leak_check.py" --staged; then
+  echo ""
+  echo "ux-mizan: commit blocked -- a staged file matches a forbidden term."
+  echo "ux-mizan: commit engellendi -- hazirlanan bir dosya yasakli bir terimle eslesiyor."
+  exit 1
+fi
+
 exit 0

@@ -86,7 +86,7 @@ Matris hem şemada belgelidir hem `ux_validate.py` içinde
 
 | Betik | Ürettiği | Çıktısının katmanı |
 |---|---|---|
-| `ux_validate.py` | U1–U11 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
+| `ux_validate.py` | U1–U12 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
 | `structural_checks.py` | Durum kapsamı, geri bildirim boşlukları, jenerik etiketler, nav derinliği, yetim rotalar | `[KKE]` — ne eksik |
 | `layout_signals.py` | Yerleşim izleri + her birinin izin verdiği davranışsal hipotez | iz `[KKE]`, iddia `[H]` |
 | `lostness.py` | Akış başına L; tamamlanan ve terk edilen ayrı raporlanır | anlam kazanması için Katman-B verisi gerekir |

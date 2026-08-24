@@ -28,6 +28,8 @@ Dependency: PyYAML  (pip install pyyaml)
 from __future__ import annotations
 
 import argparse
+import datetime
+import re
 import subprocess
 import sys
 from typing import Any
@@ -262,6 +264,28 @@ MSG = {
         "W3: flow {fid} has no measured baseline. Without one, no number on this flow is interpretable.",
         "W3: {fid} akisinin olculmus baseline'i yok. Baseline olmadan bu akistaki hicbir sayi yorumlanamaz.",
     ),
+    "U12_no_review_by": (
+        "U12: finding {id} is open with no review_by date -- an open finding with no deadline is "
+        "not tracked, it is stored. Set review_by when you open it.",
+        "U12: {id} bulgusu acik ama review_by tarihi yok -- son tarihi olmayan acik bir bulgu "
+        "takip edilmiyor, sadece saklaniyor. Actiginda review_by yaz.",
+    ),
+    "U12_review_overdue": (
+        "U12: finding {id} passed its review_by ({due}) on {asof} and records no decision. W4 has "
+        "warned since v0.1 that an unowned open finding ages into a permanent [H]; this is the "
+        "date that stops it -- extend with a reason and a new review_by, park it (status: parked), "
+        "or close it.",
+        "U12: {id} bulgusu review_by tarihini ({due}) {asof} itibariyla gecti ve hicbir karar "
+        "kaydetmiyor. W4 v0.1'den beri sahipsiz acik bir bulgunun kalici bir [H]'ye yaslanacagini "
+        "soyluyordu; bunu durduran tarih budur -- gerekce ve yeni bir review_by ile uzat, beklet "
+        "(status: parked), ya da kapat.",
+    ),
+    "U12_bad_date": (
+        "U12: finding {id} has review_by {due!r}, which is not an ISO date (YYYY-MM-DD). A "
+        "deadline nobody can compare against is not a deadline.",
+        "U12: {id} bulgusunun review_by degeri {due!r} -- ISO tarih (YYYY-AA-GG) degil. "
+        "Karsilastirilamayan bir son tarih, son tarih degildir.",
+    ),
     "W4_orphan_open": (
         "W4: finding {id} is open with no owner and no scheduled measurement -- it will age into a permanent [H].",
         "W4: {id} bulgusu acik ama sahibi ve planlanmis olcumu yok -- kalici bir [H]'ye donusecek.",
@@ -320,6 +344,25 @@ class Report:
 
 def _flows(reg: dict) -> list[dict]:
     return [f for f in (reg.get("flows") or []) if isinstance(f, dict)]
+
+
+_AS_OF = {"value": None}
+
+
+def _as_of() -> str:
+    """Today, unless --as-of pinned it. Pinning makes a run reproducible; not
+    pinning lets the calendar decide, which is the point of U12."""
+    return _AS_OF["value"] or datetime.date.today().isoformat()
+
+
+def _schema_at_least(reg: dict, want: tuple[int, int]) -> bool:
+    raw = str(((reg or {}).get("registry") or {}).get("schema_version") or "")
+    parts = raw.split(".")
+    try:
+        got = (int(parts[0]), int(parts[1]) if len(parts) > 1 else 0)
+    except ValueError:
+        return False
+    return got >= want
 
 
 def _findings(reg: dict) -> list[dict]:
@@ -493,6 +536,21 @@ def check_findings(reg: dict, rep: Report) -> None:
                 "evidence_artifact_id"):
             rep.w("W4_orphan_open", id=fid)
 
+        # ---- U12: the deadline that makes W4's warning terminal.
+        # W4 has said since v0.1 that an unowned open finding "will age into a
+        # permanent [H]". It was right and it changed nothing, because a
+        # warning that never comes due is a note. U12 is the same observation
+        # with a date attached. Gated on schema 0.5 so registries written
+        # before the field existed migrate deliberately.
+        if status == "open" and _schema_at_least(reg, (0, 5)):
+            due = str(finding.get("review_by") or "").strip()
+            if not due:
+                rep.v("U12_no_review_by", id=fid)
+            elif not re.fullmatch(r"\d{4}-\d{2}-\d{2}", due):
+                rep.v("U12_bad_date", id=fid, due=due)
+            elif due < _as_of():
+                rep.v("U12_review_overdue", id=fid, due=due, asof=_as_of())
+
     # ---- W1 / W2: shape of the audit as a whole
     if tiered and all(f.get("tier") == "K" for f in tiered):
         rep.w("W1_all_proven")
@@ -569,9 +627,14 @@ def main() -> int:
     parser.add_argument("--lang", choices=["en", "tr"], default="en")
     parser.add_argument("--against", metavar="GITREF",
                         help="git ref to check append-only (U4) against")
+    parser.add_argument("--as-of", metavar="YYYY-MM-DD",
+                        help="treat this as today for U12 deadlines (default: the real date). "
+                             "Pin it to make a run reproducible.")
     parser.add_argument("--strict", action="store_true",
                         help="promote warnings W1-W4 to violations")
     args = parser.parse_args()
+    # Pin "today" for U12 before anything reads it.
+    _AS_OF["value"] = args.as_of
 
     rep = Report(args.lang)
     reg = load_yaml(args.registry, args.lang)

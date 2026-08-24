@@ -86,7 +86,7 @@ one that runs, and the disagreement is itself a finding.
 
 | Script | Produces | Tier of its output |
 |---|---|---|
-| `ux_validate.py` | U1–U11 verdicts, W1–W4 warnings | — (it checks, it does not claim) |
+| `ux_validate.py` | U1–U12 verdicts, W1–W4 warnings | — (it checks, it does not claim) |
 | `structural_checks.py` | State coverage, feedback gaps, generic labels, nav depth, orphan routes | `[KKE]` — what is missing |
 | `layout_signals.py` | Arrangement traces + the behavioural hypothesis each licenses | trace `[KKE]`, claim `[H]` |
 | `lostness.py` | Per-flow L, completed and abandoned reported apart | needs Layer-B data to mean anything |

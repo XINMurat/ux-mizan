@@ -126,7 +126,7 @@ geçerlidir; *nerede*yi söyler, *neden*i söylemez; akış başınadır, global
 değil; ve 0,4/0,5 eşikleri hipertext çalışmalarından gelir, sizin
 uygulamanız için valide değildir.
 
-## Sert kurallar (U1–U11)
+## Sert kurallar (U1–U12)
 
 | kural | ne yapar |
 |---|---|
@@ -141,6 +141,7 @@ uygulamanız için valide değildir.
 | U9 | `[K]` öncesi kilitli `min_n` ve karar kuralı |
 | U10 | önerilen düzeltme homojenleşme öz-kontrolü taşır — jenerik varsayılan mı diye sorulmamış bir redesign, bu skill'in teşhis ettiği hastalığın kendisidir |
 | U11 | `[KKE]` *hangi* kontrolün eksik olduğunu adlandırır; "kontrol eksik" hangisi denmeden eyleme dönüşmez |
+| U12 | açık bir bulgu `review_by` taşır; tarih geçtiğinde bulgu bir karar kaydetmek zorundadır — uzat, beklet ya da kapat. W4 bunu 0.1'den beri uyarıyordu; U12, uyarıyı terminal yapan tarihtir |
 
 W1–W4 uyarıları bloke etmez; `--strict` onları hataya çevirir. CI strict
 koşar, yerel koşu koşmaz — yalnızca durdurabilen bir araç, insanlara onu

@@ -83,7 +83,7 @@ Redesign first and diagnose afterwards. Report a number with no baseline.
 
 Three things, stated plainly:
 
-1. **The hard rules.** U1–U11 live in a script. This block *describes*
+1. **The hard rules.** U1–U12 live in a script. This block *describes*
    them; it cannot enforce them. An instruction block is negotiable by the
    host's other instructions — a script is not.
 2. **The metric applicability matrix.** Six app types and what each

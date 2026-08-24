@@ -52,7 +52,7 @@ produce `[K]` (Layer B). **If the referee writes it, there is no `[K]`.**
   primacy and the severity formula are structural, not advisory.
 - **A metric applicability matrix** gated by `app_type`, so lostness on a
   single-canvas tool fails validation instead of being reported.
-- **`ux_validate.py`** — rules U1–U11 enforced without a model.
+- **`ux_validate.py`** — rules U1–U12 enforced without a model.
 - **`lostness.py`** — Smith (1996) per flow, from ordinary screen-view
   telemetry, with its four caveats printed beside every number.
 - **`structural_checks.py`** — Layer-A React/TS proxies, all `[KKE]`.
@@ -132,7 +132,7 @@ gerçek kullanıcı veya otomatik hakemden gelir (Katman B).
   ve severity formülü yapısaldır, tavsiye değil.
 - **`app_type`'a kapılı metrik uygulanabilirlik matrisi**: tek-tuval bir
   araçta lostness raporlanamaz, doğrulamadan geçemez.
-- **`ux_validate.py`** — U1–U11, modelsiz.
+- **`ux_validate.py`** — U1–U12, modelsiz.
 - **`lostness.py`** — Smith (1996), akış başına, sıradan ekran
   telemetrisinden; dört uyarısı her sayının yanında basılır.
 - **`structural_checks.py`** — Katman-A React/TS vekilleri, hepsi `[KKE]`.

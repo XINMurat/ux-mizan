@@ -7,3 +7,7 @@ __pycache__/
 # They live in ../ux-mizan-runs/ — see SELF-VALIDATION.md for what the
 # first run found about the SKILL, which is the part that is publishable.
 runs/
+
+# The forbidden-terms list is names that must never be published. Committing it
+# to a public repository would publish exactly what it exists to keep out.
+.forbidden-terms

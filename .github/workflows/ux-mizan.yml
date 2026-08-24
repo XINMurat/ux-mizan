@@ -371,6 +371,75 @@ jobs:
           echo "$out" | grep -q "U11: finding UX-001 carries kke_kind"             || { echo "FAIL: U11 allowed a stale kke_kind on a non-KKE entry" >&2; exit 1; }
           echo "OK: U11 holds both directions."
 
+      - name: Self-test — U12 must force a decision on a finding that stopped moving
+        run: |
+          set -e
+          # W4 has warned since schema 0.1 that an unowned open finding "will
+          # age into a permanent [H]". It was right and it changed nothing: a
+          # warning that never comes due is a note. U12 is the same observation
+          # with a date attached. --as-of pins the date so this test does not
+          # depend on when CI happens to run.
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: P, schema_version: "0.5"}
+          flows:
+            - flow_id: "F-001"
+              app_type: "single-canvas-tool"
+              priority_weight: 0.5
+              frequency: 2.0
+              applicable_metrics: [task_success]
+              baseline: {values: {task_success: 0.5}}
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "flow-level"
+              location: "src/a.tsx:1"
+              mechanism: "a causal chain"
+              tier: "H"
+              refutation_condition: "x refutes"
+              metric: {name: task_success, kind: behavioural, instrument: "sessions"}
+              source_provenance: "walkthrough"
+              gate_provenance_version: 1
+              failure_magnitude: 0.5
+              severity: 0.5
+              status: "open"
+              owner: "fe"
+          YAML
+
+          out="$(python skill/ux-mizan/scripts/ux_validate.py --as-of 2026-08-24 "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U12: finding UX-001 is open with no review_by" || { echo "FAIL: U12 did not require a review_by on an open finding" >&2; exit 1; }
+
+          sed -i 's|    status: "open"|    status: "open"\n    review_by: "2026-03-01"|' "$tmp"
+          out="$(python skill/ux-mizan/scripts/ux_validate.py --as-of 2026-08-24 "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U12: finding UX-001 passed its review_by" || { echo "FAIL: a passed deadline with no decision did not fire U12" >&2; exit 1; }
+          echo "OK: U12 fires on a missing deadline and on a passed one."
+
+          # Each of the three ways out clears it.
+          for way in extend park close; do
+            cp "$tmp" "$tmp.try"
+            case "$way" in
+              extend) sed -i 's|review_by: "2026-03-01"|review_by: "2099-01-01"|' "$tmp.try" ;;
+              park)   sed -i 's|status: "open"|status: "parked"|' "$tmp.try" ;;
+              close)  sed -i 's|status: "open"|status: "confirmed"|' "$tmp.try" ;;
+            esac
+            out="$(python skill/ux-mizan/scripts/ux_validate.py --as-of 2026-08-24 "$tmp.try" || true)"
+            if echo "$out" | grep -q "U12:"; then
+              echo "FAIL: U12 still fires after: $way" >&2; echo "$out" >&2; exit 1
+            fi
+          done
+          echo "OK: extend, park and close each clear U12 — silence is the only thing that does not."
+
+          # The gate: a registry written before the field existed is untouched.
+          sed -i 's|schema_version: "0.5"|schema_version: "0.4"|' "$tmp"
+          out="$(python skill/ux-mizan/scripts/ux_validate.py --as-of 2026-08-24 "$tmp" || true)"
+          if echo "$out" | grep -q "U12:"; then
+            echo "FAIL: U12 fired on a 0.4 registry; the migration gate is not holding" >&2; exit 1
+          fi
+          echo "OK: U12 waits for schema 0.5, the way U1-U9 waited for 0.1."
+
       - name: Self-test — lostness stays undefined where it is undefined
         run: |
           set -e
@@ -529,6 +598,26 @@ jobs:
               sys.exit(1)
           print(f"ok  every rule-range claim says U1-U{top}")
           PY
+
+      - name: No real name reaches what gets published
+        env:
+          # Set this repository secret to a newline-separated list of names that
+          # must never be published: clients, internal products, private repos.
+          # Unset, the sweep reports NOT CONFIGURED and passes -- a repository
+          # that has not set this up is not a repository that failed.
+          FORBIDDEN_TERMS: ${{ secrets.FORBIDDEN_TERMS }}
+        run: |
+          set -e
+          # From vaddermail/maestro-framework, check 14. The examples here use
+          # invented names on purpose; that is the discipline, this is the net.
+          # A real name in a tracked file is published the moment it is pushed,
+          # and deleting it afterwards does not un-publish it.
+          #
+          # The tree and the package are swept separately: they are built by
+          # different code, so a clean tree does not prove a clean ux-mizan.skill.
+          # A hit prints the file, the line and the term's index -- never the
+          # term, because this log is public.
+          python tools/leak_check.py --package ux-mizan.skill
 
   skill-package-in-sync:
     runs-on: ubuntu-latest

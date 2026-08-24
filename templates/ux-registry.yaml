@@ -1,5 +1,5 @@
 # =====================================================================
-# ux-mizan Registry Schema v0.4  (ux-registry.yaml)
+# ux-mizan Registry Schema v0.5  (ux-registry.yaml)
 # =====================================================================
 # Two linked tables. Flows are PREMISES (Gate 0 + Gate 1 fill them, a
 # human locks them). Findings are FINDINGS (the audit fills them, each
@@ -181,6 +181,22 @@
 #
 # =====================================================================
 # SCHEMA VERSIONS
+#   0.5 — adds `review_by` on findings and activates U12: an open finding
+#         carries a deadline, and a passed deadline forces a decision —
+#         extend with a reason, park it, or close it.
+#         W4 has warned since 0.1 that an unowned open finding "will age into
+#         a permanent [H]". It was right and it changed nothing, because a
+#         warning that never comes due is a note. U12 is the same observation
+#         with a date attached. Adapted from vaddermail/maestro-framework,
+#         whose learning ledger expires a candidate after three rounds or
+#         twelve months and forces the same terminal choice.
+#         The temporal half is decided by the CALENDAR, so a green main can
+#         turn red with no commit in between. That is the rule working: a
+#         deadline that cannot interrupt you is a reminder, not a gate.
+#         `--as-of YYYY-MM-DD` pins the date when a run must be reproducible.
+#         MIGRATION: registries at 0.1-0.4 stay valid and unenforced. The cost
+#         is one date per OPEN finding; closed ones pay nothing, which is the
+#         point — the cost falls on the findings that have stopped moving.
 #   0.1 — initial two-table format; rules U1-U9 and warnings W1-W4
 #         active. No migration path yet: nothing has been written
 #         against an earlier version. When 0.2 lands, follow Mizan's
@@ -286,7 +302,11 @@ findings:
     failure_magnitude: 0.0        # 0.0-1.0, share of the flow estimated lost
     frequency: null               # null -> inherit the parent flow's frequency
     severity: 0.0                 # RECOMPUTED by the validator (U3)
-    status: "open"                # open | instrumented | confirmed | refuted
+    status: "open"                # open | instrumented | confirmed | refuted | parked
+    review_by: "2099-01-01"       # MANDATORY while open (U12, from schema 0.5)
+    # Deliberately far out: a blank form is not a live registry, so its
+    # example date must never come due and redden CI on its own. In a real
+    # finding this is weeks away, and U12 means it.
     owner: null
     fix: >
       <the smallest change with the largest effect; name the file.>
