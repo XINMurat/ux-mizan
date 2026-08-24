@@ -15,6 +15,20 @@ set -euo pipefail
 LANG_OPT="${UX_MIZAN_LANG:-en}"   # export UX_MIZAN_LANG=tr for Turkish messages
 PYTHON="${PYTHON:-python}"
 here="$(git rev-parse --show-toplevel)"
+
+# --- leak gate (FIRST: every later branch has an early exit 0) --------------
+# Nothing published can carry a real name. The list lives in .forbidden-terms
+# (gitignored); with no list this is a no-op, so the hook stays usable by
+# anyone who has not set one up. This runs before the commit rather than only
+# in CI because CI runs after the push, and a push to a public repository is
+# the publication itself.
+if ! "$PYTHON" "$here/tools/leak_check.py" --staged; then
+  echo ""
+  echo "ux-mizan: commit blocked -- a staged file matches a forbidden term."
+  echo "ux-mizan: commit engellendi -- hazirlanan bir dosya yasakli bir terimle eslesiyor."
+  exit 1
+fi
+
 validator="$here/skill/ux-mizan/scripts/ux_validate.py"
 
 mapfile -t files < <(git diff --cached --name-only --diff-filter=ACM \
@@ -44,17 +58,5 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
-# --- leak gate -------------------------------------------------------------
-# Nothing published can carry a real name. The list lives in .forbidden-terms
-# (gitignored) -- with no list this is a no-op, so the hook stays usable by
-# anyone who has not set one up. This runs before the commit rather than in CI
-# because CI runs after the push, and a push to a public repository is the
-# publication itself.
-if ! "$PYTHON" "$here/tools/leak_check.py" --staged; then
-  echo ""
-  echo "ux-mizan: commit blocked -- a staged file matches a forbidden term."
-  echo "ux-mizan: commit engellendi -- hazirlanan bir dosya yasakli bir terimle eslesiyor."
-  exit 1
-fi
 
 exit 0
