@@ -27,6 +27,8 @@ with two changes that its own setting does not need and this one does:
 
 USAGE
 -----
+    python tools/sync_forbidden_terms.py       # push the list to the CI secret
+    python tools/sync_forbidden_terms.py --check   # has it drifted from the secret?
     python tools/leak_check.py                 # sweep tracked files
     python tools/leak_check.py --package ux-mizan.skill
     python tools/leak_check.py --staged        # what a pre-commit hook runs
