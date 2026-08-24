@@ -10,7 +10,7 @@ not a contribution.
 
 ## English
 
-### Ground rules (the same U1–U9 the tool enforces)
+### Ground rules (the same U1–U12 the tool enforces)
 
 1. **A `[K]` needs an artifact.** No claim in this repo reaches `[K]`
    without a resolving evidence artifact and a non-model collector. This
@@ -84,7 +84,7 @@ exercises is a rule that quietly stopped working.
 
 ## Türkçe
 
-### Temel kurallar (aracın uyguladığı U1–U9'un aynısı)
+### Temel kurallar (aracın uyguladığı U1–U12'un aynısı)
 
 1. **`[K]` için artefakt şart.** Bu depoda hiçbir iddia, çözümlenen bir
    kanıt artefaktı ve model olmayan bir toplayıcı olmadan `[K]` olmaz.

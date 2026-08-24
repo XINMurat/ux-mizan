@@ -558,7 +558,7 @@ jobs:
           # the past, and rewriting history to match the present is the
           # opposite of what an append-only family should do.
           python - <<'PY'
-          import io, re, sys, glob
+          import io, os, re, sys, glob
           src = io.open("skill/ux-mizan/scripts/ux_validate.py", encoding="utf-8").read()
           have = sorted({int(n) for n in re.findall(r'"U([0-9]+)[:_]', src)})
           if not have:
@@ -568,12 +568,12 @@ jobs:
           print(f"validator implements U1-U{top}")
 
           bad = []
-          for path in glob.glob("docs/**/*.md", recursive=True) + ["README.md", "skill/ux-mizan/SKILL.md"]:
+          for path in [p for p in (glob.glob("docs/**/*.md", recursive=True) + ["README.md", "skill/ux-mizan/SKILL.md", "CONTRIBUTING.md"] + glob.glob("tools/**/*", recursive=True) + glob.glob("skill/**/references/*.md", recursive=True)) if os.path.isfile(p) and "__pycache__" not in p and not p.endswith((".pyc", ".xlsx", ".skill"))]:
               # A changelog entry wraps across lines, so the exemption has to
               # follow the paragraph, not the line: "**v1.0** - ... G1-G6 ..."
               # is true about v1.0 no matter which line the range lands on.
               dated = False
-              for i, line in enumerate(io.open(path, encoding="utf-8").read().splitlines(), 1):
+              for i, line in enumerate(io.open(path, encoding="utf-8", errors="replace").read().splitlines(), 1):
                   if not line.strip():
                       dated = False
                   elif re.search(r"\*\*v[0-9]+\.[0-9]+\*\*", line):

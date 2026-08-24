@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# ux-mizan pre-commit hook — runs the U1-U9 validator on staged registries.
-# ux-mizan pre-commit kancası — hazırlanmış registry dosyalarını U1-U9 denetler.
+# ux-mizan pre-commit hook — runs the U1-U12 validator on staged registries.
+# ux-mizan pre-commit kancası — hazırlanmış registry dosyalarını U1-U12 denetler.
 #
 # Install / Kurulum:
 #   cp tools/hooks/pre-commit .git/hooks/pre-commit
@@ -38,8 +38,8 @@ done
 
 if [ "$fail" -ne 0 ]; then
   echo ""
-  echo "ux-mizan: commit blocked — registry violates a hard rule (U1-U9)."
-  echo "ux-mizan: commit engellendi — registry bir sert kuralı (U1-U9) ihlal ediyor."
+  echo "ux-mizan: commit blocked — registry violates a hard rule (U1-U12)."
+  echo "ux-mizan: commit engellendi — registry bir sert kuralı (U1-U12) ihlal ediyor."
   echo "       Fix the entry, or if this is a deliberate exception, document it."
   exit 1
 fi
