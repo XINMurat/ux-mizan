@@ -1,9 +1,9 @@
 # ux-mizan — Kanıt-Katmanlı UX Denetimi
 ## Türkçe Tam Dokümantasyon (SKILL.md + kapılar + metrikler + devir)
 
-> Bu belge, `ux-mizan.skill` paketinin içindeki beş dosyanın Türkçe
+> Bu belge, `ux-mizan.skill` paketinin içindeki altı dosyanın Türkçe
 > karşılığıdır: `SKILL.md`, `references/gates.md`, `references/walkthrough.md`,
-> `references/metrics.md`, `references/handoff.md`. Skill'in kendisi
+> `references/metrics.md`, `references/handoff.md`, `references/recovery.md`. Skill'in kendisi
 > İngilizce çalışır (taşınabilirlik için) ama Claude ile her zaman Türkçe
 > konuşabilirsiniz — skill, kullanıcının dilinde yanıt vermeyi zaten kural
 > olarak içerir.
@@ -20,6 +20,10 @@
 > **sezgisel/yapısal uygunluğu** denetleyebilir ve **ölçüm düzeneğini
 > kurabilir**. Hem üretici hem yargıç olduğunda çıktısı en fazla `[KKE]`'dir.
 > **Hakem yazarsa `[K]` yoktur.**
+
+Aynı koşuda daha önce ürettiğin bir şeyi denetlemek üzereysen, denetlemeden
+**önce söyle** — arıza geçişin kendisi değil, ilan edilmemiş olmasıdır
+(§12, R-00).
 
 Mimari bu yüzden iki katmanlıdır:
 
@@ -165,6 +169,29 @@ geçemez:**
 
 Premisi yerinde düzenleyip devam etmek, denetimin şu an iddia ettiğinden
 farklı bir soruya karşı koşturulduğu gerçeğini siler.
+
+### Öneri kuralı — her kapıda ve her açık soruda
+
+**Soruyu getiren önerisini ve gerekçesini de getirir.** Yalnız Kapı 0'da değil:
+her kapıda, her açık konuda, denetim ortasında bulunan her belirsizlikte.
+
+```
+DURUM:      <karara bağlanmamış olan, tek cümle>
+SEÇENEK:    A <...>  B <...>
+ÖNERİM:     A
+GEREKÇE:    <Kapı 0'a veya kanıta bağlı, zevke değil>
+YANILIRSAM: <A'yı seçip yanılmanın bedeli>
+```
+
+İki sebebi var. Modelin muhakemesini **denetlenebilir** yapar — öneriye itiraz
+edilebilir, çıplak soruya edilemez. Ve insanın işini "sıfırdan düşün"den
+"onayla ya da düzelt"e çevirir; okunan kapı ile lastik damga yiyen kapı
+arasındaki fark budur.
+
+Karar yine insanındır. **Öneri onay değildir, cevapsız öneri rıza değildir** —
+sert kapıda bloke eder, yumuşak kapıda `locked_by: model-default` olur ve
+bulgular `[H]`'de tavanlanır. Kendi önerini cevap gibi kaydetmek, U7'nin
+önlemek için var olduğu döngü-kapatma hamlesidir.
 
 ## 4. Registry — iki bağlı tablo
 
@@ -352,3 +379,49 @@ Düşük L "kullanıcı kaybolmuyor" demez; "kaybolmanın bilinen navigasyonel
 imzası yok" der. Bu yöntemin `[K]`'ya en yaklaştığı yer, L ile gerçek görev
 başarısının — ya da birkaç moderasyonlu oturumun — **aynı yöne** işaret
 ettiği noktadır.
+
+## 12. Kurtarma rampaları — denetimin kendisi bozulduğunda
+
+`references/recovery.md` karşılığı. Diğer her bölüm denetimin **çalışan** hâlini
+anlatır; bu bölüm **bozulan** hâlini — ki daha sık olan ve zararın sessizce
+verildiği hâl odur. Sessizce toparlanan bir denetimin hata oranı ölçülemez, ve
+bu tam olarak `[R]` satırlarını silmeye yapılan itirazın denetçiye çevrilmiş
+hâlidir.
+
+Her rampa aynı biçimde: **DURUM · İLK HAMLE · YASAK · ÇIKTI · DAYANAK.** Son
+satır her zaman var olan bir kurala düşer — yalnız düzyazıya yaslanan rampayı
+uzun oturum unutur.
+
+| Kod | Durum | Temel kural | Dayanak |
+|---|---|---|---|
+| **R-00** | Kendi çıktını yargılamak üzeresin | Geçişi ilan et, tier'ı tavanla | U1, taşıyıcı gerçek |
+| **R-01** | Söz verilen artifact çalışmadı | Düzyazıyı artifact yerine koyma; kısıtı beyan et | İşletim varsayımları |
+| **R-02** | Katman B verisi bulguyu çürüttü | Arayüz mü, bulgu mu, ölçüm mü — **eşiği oynatma** | U4, U5, U6, U8 |
+| **R-03** | Metrik koşular arası kararsız | Deterministikleştir; uyan koşuyu raporlama | U11, metrics.md |
+| **R-04** | Redesign çalışan akışı bozdu | Önce eski hâle dön; kill condition zaten yazılıydı | handoff.md, U4 |
+| **R-05** | Yerleştirilemeyen bulgu | Asgari iz; iz yoksa gerekçeli kapanış | U11, pozitif kontrol kuralı |
+| **R-06** | Bulgu artıyor, severity düz | Üretmeyi bırak, çürütmeye başla | U3, U5, W2 |
+| **R-07** | Kilitli akışların dışına kayma | Park listesi; kapsamı insan büyütür | U2, U3 |
+| **R-08** | Premise iş ortasında kaydı | Kapı 0 sürümünü yükselt, yeniden türet | U7, kapı yeniden-açma |
+| **R-09** | Bağlam bulanıklaştı | Registry hafızadır; devir bloğu yaz ve kes | U12 |
+| **R-10** | Belirsizlik / docs-kod çelişkisi | Varsayma, boş elle sorma (öneri kuralı) | gates.md, U7 |
+| **R-11** | Redesign'i geri alma | İleri sar; ölçüm **yeni** baseline'dır | U4, handoff.md |
+| **R-12** | Hedef tutmadı | Ölç, **tek** değişiklik, aynı aletle yeniden ölç | U8, metrics.md |
+
+**Model hata sınıfları.** Rampalar çare, bunlar hastalık: uydurma · sessiz
+boşluk doldurma · bulgu enflasyonu · totolojik ölçüm · kendi çıktısını onaylama
+· iyimser raporlama · eşik yumuşatma · kapsam kayması · sahte onarım · bağlam
+çürümesi. Model bunları seçmez; hem üretip hem yargılayan bir tarafın işe yarar
+görünme baskısı altındaki davranışıdır — tek güvenilir savunma, fark eden bir
+yapıdır.
+
+**Kapanış çizelgesi.** Kapı 4'ten sonra ya da iş bittiğinde doldurulur; amaç
+denetimi notlamak değil **yöntemin nereden sızdırdığını** bulmak: premise
+revizyonu · aday/kayda giren oranı · **`[R]` oranı** (sıfır uyarıdır, başarı
+değil — hiç yanılmamış denetim sınanmamış denetimdir) · kapanışta açık `[KKE]`
+· kullanılan rampalar · `[K]`'ya terfi · **kaçan** (denetimin akışlarını kapsayıp
+gözden kaçırdığı, sonradan bulunan sorun — dışarıdan gelen ve içeriden
+manipüle edilemeyen tek sayı).
+
+Çizelge de bir iddiadır: denetimi üreten koşu doldurduysa `independence`
+kontrolü eksiktir, `[KKE]`'dir. Söyle.
