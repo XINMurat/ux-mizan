@@ -13,6 +13,7 @@ yüklediği dosyaların ta kendisi — böylece gerçekte koşandan sapamaz.
 | Walkthrough şablonu ve kör noktaları | [`references/walkthrough.md`](../../skill/ux-mizan/references/walkthrough.md) |
 | Metrik bataryası, uygulanabilirlik matrisi, lostness, baseline, ölçüm planı | [`references/metrics.md`](../../skill/ux-mizan/references/metrics.md) |
 | Kapı 3, redesign, spec devri, iki-model devrinin vaat edemeyeceği | [`references/handoff.md`](../../skill/ux-mizan/references/handoff.md) |
+| Kurtarma rampaları R-00…R-12, model hata sınıfları, kapanış çizelgesi | [`references/recovery.md`](../../skill/ux-mizan/references/recovery.md) |
 | Registry formatı ve kuralların yorum hâli | [`schemas/ux-registry.yaml`](../../skill/ux-mizan/schemas/ux-registry.yaml) |
 
 ## Kanıt katmanları

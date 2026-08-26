@@ -98,3 +98,8 @@ TIER ON ARRIVAL: [H] — re-measure before any promotion
 The kill condition is not optional. A change with no condition under which
 it gets reverted accumulates as permanent surface area, and the next audit
 inherits it as though it were a decision someone made on purpose.
+
+When one fires, `references/recovery.md` has the procedure: R-04 if the
+change regressed a flow that worked, R-11 for the rollback itself. Both
+exist to stop the same reflex — quietly removing the record of a
+prediction that turned out wrong.

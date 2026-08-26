@@ -21,6 +21,9 @@ not evidence, and the authority illusion is this skill's own risk #3.
 > **heuristic and structural conformance**, and it can **build the
 > measuring rig**. When the model is both the producer and the judge, its
 > output is `[KKE]` at best. **If the referee writes it, there is no `[K]`.**
+When you are about to review something you produced earlier in the same
+run, say so before you do it — the undeclared switch is the failure, not
+the switch (`references/recovery.md`, R-00).
 
 So the architecture has two layers:
 
@@ -269,8 +272,9 @@ an audit, tiers in place, judgment gone.
   artifact is a producer-side claim.**
 - **Load references on demand.** `gates.md` before the first gate,
   `walkthrough.md` before the walkthrough, `metrics.md` before
-  instrumenting, `handoff.md` before a redesign. Reading all of them up
-  front spends the context the audit needs.
+  instrumenting, `handoff.md` before a redesign, `recovery.md` the moment
+  a run stops behaving. Reading all of them up front spends the context
+  the audit needs.
 - **An audit run under a constraint states the constraint.** A reduced
   method is not a smaller audit; it is an audit making a different claim.
 
@@ -288,6 +292,9 @@ an audit, tiers in place, judgment gone.
 
 ## References
 
+- `references/recovery.md` — the twelve recovery ramps (R-00…R-12) for
+  when the audit itself goes wrong, the model failure classes they exist
+  for, and the closing process scorecard.
 - `references/gates.md` — the five gates: question sets, defaults,
   re-opening protocol, and what "the human locks it" concretely means.
 - `references/walkthrough.md` — the cognitive-walkthrough template: step ×

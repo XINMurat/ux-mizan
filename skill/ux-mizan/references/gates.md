@@ -12,6 +12,32 @@ Hard gates (0, 3, 4) the model may not pass alone. Soft gates (1 partly, 2)
 degrade gracefully: with no answer, take a default, record
 `locked_by: model-default`, mark the affected findings `[H]`, and continue.
 
+## The proposal rule — applies at every gate, and to every open question
+
+**Whoever brings the question brings their recommendation and its reason.**
+Not only at Gate 0, where "the model proposes first" is written out below,
+but at every gate, every open item, every ambiguity found mid-audit.
+
+```
+SITUATION:      <what is undecided, one sentence>
+OPTIONS:        A <...>  B <...>
+RECOMMENDATION: A
+BECAUSE:        <tied to Gate 0 or to evidence, not to taste>
+COST IF WRONG:  <what taking A and being wrong costs>
+```
+
+Two reasons this is a rule and not a courtesy. It makes the model's
+reasoning **inspectable** — a recommendation can be disagreed with, a bare
+question cannot. And it changes what the human has to do from *think about
+this from scratch* to *confirm or correct*, which is the difference
+between a gate that gets read and a gate that gets rubber-stamped.
+
+The decision still belongs to the human. **A recommendation is not an
+approval, and an unanswered recommendation is not consent** — on a hard
+gate it blocks; on a soft gate it becomes a `locked_by: model-default`
+with the findings capped. Recording your own recommendation as though it
+were the answer is the loop-closing move U7 exists to prevent.
+
 ---
 
 ## Gate 0 — Purpose and priority (HARD)
