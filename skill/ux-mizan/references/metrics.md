@@ -122,6 +122,32 @@ Two consequences worth writing into the entry rather than discovering later:
 If you instrument these, record the three parameters in the flow's registry
 entry the way `min_n` is recorded — before collection, not after.
 
+## Consistency, and the metric that decides it
+
+`component_inventory.py` counts how much of the interface escaped its own
+scale. Those counts are `[KKE]`: they say a codebase has 28 colours and 14 of
+them appear once, which is a fact about the files and not yet a fact about
+anybody's experience.
+
+The behavioural claim underneath is **transfer**: a user learns an interface
+once per pattern, so a consistent app should get *easier* with each new screen
+and an inconsistent one should not. That is measurable, and it is the only
+thing here that turns a consistency count into evidence:
+
+- **First-click accuracy on an unseen screen**, measured after the participant
+  has completed tasks on three or more others. If the interface transfers,
+  accuracy on screen four is at least as good as on screen one. If every screen
+  is its own dialect, it is not.
+- **Time-on-task across repeated encounters** with the same control in
+  different places. Flat or rising time where it should fall is the cost the
+  inventory counts are proxies for.
+
+Both need the same discipline as everything else here: a baseline first, `min_n`
+locked, thresholds before collection. And note what neither can tell you —
+whether a particular divergence was *deliberate*. A destructive action that
+looks unlike the rest is doing its job. Only a human can separate the two, which
+is why the counts enter Gate 2 as candidates rather than findings.
+
 ## Baseline — mandatory, and prior to any redesign
 
 "L = 0.55" alone is meaningless. Good and bad exist only against a

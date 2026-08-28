@@ -109,24 +109,41 @@ finding on that flow is capped at `[H]`.
    `[H]` line as though the file proved it.** This is the class of problem
    `walkthrough.md` declares itself blind to: cumulative load is invisible
    step by step, because each step looks fine.
-6. **Gate 2.** Put the candidate findings in front of the human BEFORE
+6. **Layer A — cross-file consistency.** Run
+   `scripts/component_inventory.py <src>`. Where the structural checks ask
+   what one view is missing and the layout signals ask how one screen is
+   arranged, this asks what only exists BETWEEN screens: how many distinct
+   raw colour and spacing values escaped the scale, whether the same
+   interactive role is built several ways, how much is defined inside a page
+   and used once. A user learns an interface once per pattern, not once per
+   app, so an app with several idioms for one control charges the learning
+   cost several times — but the SIZE of that cost is not in the file, which
+   is why each signal names the metric that would settle it.
+
+   **This one carries risk #1 in its hand.** It measures whether the app
+   agrees with *itself*, never whether it resembles anything else, and a
+   divergence that is deliberate — a destructive action that should look
+   unlike the rest — reads here exactly like one that is not. Any fix
+   proposed from these signals answers the homogenisation question in
+   writing; U10 already refuses one that does not.
+7. **Gate 2.** Put the candidate findings in front of the human BEFORE
    they enter the registry. This is where preregistration locks: a
    threshold written after the data is HARKing.
-7. **Write the registry.** Append each confirmed finding to
+8. **Write the registry.** Append each confirmed finding to
    `ux-registry.yaml` as it is settled — **the registry is the memory,
    the transcript is not.** Batching findings for a summary at the end
    loses them at the next context reset and pays for them on every turn
    until then.
-8. **Validate.** `python scripts/ux_validate.py ux-registry.yaml`. Fix
+9. **Validate.** `python scripts/ux_validate.py ux-registry.yaml`. Fix
    what it rejects; do not argue with it in prose.
-9. **Gate 3.** Before ANY redesign or model handoff, the human approves
+10. **Gate 3.** Before ANY redesign or model handoff, the human approves
    the diagnosis and the intended direction. What they approve is **not
    pixels** — it is the diagnosis, the priority frame, and the direction.
    Approving a mockup is approval theatre. `references/handoff.md`.
-10. **Instrument.** Emit the measurement plan: which metric, which
+11. **Instrument.** Emit the measurement plan: which metric, which
    instrument, what N, what decision rule — all locked before collection.
    `references/metrics.md`.
-11. **Gate 4.** Only real Layer-B data plus a human decision promotes
+12. **Gate 4.** Only real Layer-B data plus a human decision promotes
     anything to `[K]`. The validator will not let you write `[K]` without
     a resolving evidence artifact anyway (U1).
 
@@ -311,6 +328,11 @@ an audit, tiers in place, judgment gone.
 - `scripts/lostness.py` — per-flow lostness from a screen-visit log.
 - `scripts/structural_checks.py` — Layer-A proxies for React/TS: what is
   missing (states, feedback, labels, depth).
+- `scripts/component_inventory.py` — Layer-A traces ACROSS files: value
+  dispersion (how much escaped the scale), role divergence (the same control
+  built several ways), page-local one-offs. Two signals were written, ran
+  against a real app, over-reported, and were removed rather than shipped —
+  the header says which and why, so the naive versions do not come back.
 - `scripts/layout_signals.py` — Layer-A traces of ARRANGEMENT, each paired
   with the behavioural hypothesis it licenses and the metric that decides
   it. Answers "can a model see a focus problem in code?" with: it can see
