@@ -1,0 +1,113 @@
+{
+  "skill_name": "ux-mizan",
+  "notes": "First eval run. Two targets on purpose: a real internal app (does it find anything?) and a small clean app (does it invent things?). Sensitivity and specificity in one iteration. Baseline is no skill at all.",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "real-app-layer-a",
+      "prompt": "Elimizde bir evrak yonetim arayuzu var, React + TypeScript. Kullanicilar surekli 'nerede oldugumu anlamiyorum' diyor ve bir evrangi asamada oldugunu bulmak icin bana soruyorlar. Kaynak kod C:/TRAE/genelevrak/evrak-ui altinda. Bir UX denetimi yapar misin - nerede kayboluyorlar, ve bunu nasil olcebilirim?",
+      "expected_output": "A Layer-A audit that (a) elicits or explicitly refuses to infer the app's purpose before ranking anything, (b) actually runs the bundled structural/layout scripts on the real source rather than describing what they would say, (c) produces findings that cite file and line with a named mechanism, tiered [H]/[KKE] and not [K], and (d) proposes what would measure it. A registry file is expected.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "no-unearned-K",
+          "description": "No finding or entry is tiered [K]. No behavioural data was collected in this run, so a [K] would be a producer-side claim -- the skill's own structural rule U1."
+        },
+        {
+          "name": "status-and-limits-declared",
+          "description": "The deliverable states what this audit cannot claim: Layer A only, no real-user data, and the skill's own status."
+        },
+        {
+          "name": "bundled-scripts-actually-ran",
+          "description": "Raw output of structural_checks.py and/or layout_signals.py is present and was produced against the real source. Prose describing what the scripts would say does not count -- substituting prose for an artifact is a producer-side claim."
+        },
+        {
+          "name": "findings-cite-file-and-mechanism",
+          "description": "Every finding names a concrete file (and line or symbol where applicable) plus the mechanism. 'Users get lost in the navigation' with no location is the anti-pattern this checks for."
+        },
+        {
+          "name": "gate-0-not-self-inferred",
+          "description": "The audit either asks the human to lock the app's purpose, or records a model-default explicitly and caps affected findings at [H]. Inferring purpose and auditing against that inference closes the loop and makes the audit unfalsifiable."
+        },
+        {
+          "name": "registry-passes-validator",
+          "description": "If a registry file was produced, scripts/ux_validate.py exits 0 on it. Checked programmatically, not by eye."
+        },
+        {
+          "name": "findings-carry-refutation-conditions",
+          "description": "Each [H] finding states what result would knock it down. A finding that cannot fail is decoration."
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "clean-app-inflation-control",
+      "prompt": "Kucuk bir kurs katalogu ekranimiz var, React + TypeScript, kaynak C:/TRAE/ux-mizan-workspace/fixtures/academydemo-arayuz altinda. Ekip 'UX'i bir gozden gecirilsin' dedi. Bakar misin, sorun var mi?",
+      "expected_output": "This codebase deliberately follows a strict frontend standard: every screen has loading/empty/error states, focus is visible, errors are mapped to user-facing Turkish text, tokens are used instead of hardcoded values. The honest output is a short report that says which checks ran, that they found little or nothing, and that a clean scan means 'the checks that ran found nothing' rather than 'no problems'. Fabricated findings, or a long list padded to look like work, is the failure this eval is testing for.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "no-unearned-K",
+          "description": "No finding or entry is tiered [K]. No behavioural data was collected in this run, so a [K] would be a producer-side claim -- the skill's own structural rule U1."
+        },
+        {
+          "name": "status-and-limits-declared",
+          "description": "The deliverable states what this audit cannot claim: Layer A only, no real-user data, and the skill's own status."
+        },
+        {
+          "name": "no-fabricated-findings",
+          "description": "Every reported finding is traceable to code that actually exists in the fixture. The grader opens the cited file and confirms. This target deliberately satisfies a strict frontend standard, so invented findings are the failure being tested."
+        },
+        {
+          "name": "clean-result-stated-honestly",
+          "description": "A clean or near-clean scan is reported as 'the checks that ran found nothing', naming which checks ran -- not as 'no problems' and not padded into a longer list to look like work."
+        },
+        {
+          "name": "findings-cite-file-and-mechanism",
+          "description": "Any finding names a concrete file and the mechanism, so a reader can check it. Fabrications usually cannot survive this."
+        },
+        {
+          "name": "report-length-proportionate",
+          "description": "The report's length tracks what was actually found. A long report on a clean codebase is finding inflation regardless of whether each individual item is defensible."
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "measurement-plan-registry",
+      "prompt": "Evrak arayuzunde kullanicilarin nerede kaybolduklarini olcmek istiyorum ama neye bakacagimi bilmiyorum. Ayda yaklasik 400 kez kullanilan tek bir akis var: gelen evrak kaydi. Ne kurmam gerekiyor, ve sonucun bir sey kanitladigini nereden bilecegim? Kaynak C:/TRAE/genelevrak/evrak-ui altinda.",
+      "expected_output": "A measurement plan with the metric chosen for this app_type, the instrument, min_n, a baseline requirement, and decision thresholds locked BEFORE collection. Should produce a registry file that passes scripts/ux_validate.py. Should not promise [K] from a plan that has not run, and should state the volume-based mode boundary (~300 completions/flow/month) rather than inventing one.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "no-unearned-K",
+          "description": "No finding or entry is tiered [K]. No behavioural data was collected in this run, so a [K] would be a producer-side claim -- the skill's own structural rule U1."
+        },
+        {
+          "name": "status-and-limits-declared",
+          "description": "The deliverable states what this audit cannot claim: Layer A only, no real-user data, and the skill's own status."
+        },
+        {
+          "name": "metric-valid-for-app-type",
+          "description": "The chosen metric is valid for this application type per the skill's applicability matrix, and the choice is justified. Lostness in particular requires a declared goal and a canonical path fixed in advance."
+        },
+        {
+          "name": "thresholds-and-min-n-locked-in-advance",
+          "description": "Support and refute thresholds plus min_n are stated before any collection. A threshold written after the data is HARKing."
+        },
+        {
+          "name": "baseline-required-before-change",
+          "description": "The plan requires measuring the current build before any redesign. A metric with no baseline means nothing."
+        },
+        {
+          "name": "mode-boundary-cited-not-invented",
+          "description": "The ~300 completions/flow/month boundary is applied to the user's stated 400/month and is labelled a design estimate rather than a measured threshold."
+        },
+        {
+          "name": "registry-passes-validator",
+          "description": "The produced registry file makes scripts/ux_validate.py exit 0. Checked programmatically."
+        }
+      ]
+    }
+  ]
+}

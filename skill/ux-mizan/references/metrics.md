@@ -91,6 +91,37 @@ Abandonment has no completion path, and mixing the two silently blends
 "wandered" with "gave up" — two different findings with two different
 fixes.
 
+## Frustration signals — borrow the operational definition, then say whose
+
+`rage clicks` and `dead clicks` appear in the behavioural battery, and the word
+alone is not a metric: two tools counting "rage clicks" on the same session can
+disagree by a factor of three because they define the window differently. So
+take the definition from the instrument you will actually use, cite it, and put
+it in the registry beside the number.
+
+PostHog's is a usable reference point because it is written down and
+configurable: a `$rageclick` fires on **three clicks, each within 30 px and
+1000 ms of the one before** — and all three of those are settings, not
+constants. A dead click is a click on something interactive that produces no
+navigation, no state change and no visible feedback within a short window;
+the window is again a setting.
+
+Two consequences worth writing into the entry rather than discovering later:
+
+- **The number belongs to its instrument.** A rage-click count measured under
+  3/30px/1000ms is not comparable to one measured under 5 clicks or a 2-second
+  window, and it is not comparable across tools at all. A threshold calibrated
+  on one instrument is never inherited by another — the same rule the metric
+  battery applies to every other number here.
+- **These are frustration proxies, not lostness.** A rage click says a user
+  hit something that did not answer; it does not say they could not find their
+  way. Read them *beside* lostness and step abandonment, never as a substitute:
+  a flow can score clean on rage clicks and still lose people silently, which
+  is the failure mode explicit feedback also misses.
+
+If you instrument these, record the three parameters in the flow's registry
+entry the way `min_n` is recorded — before collection, not after.
+
 ## Baseline — mandatory, and prior to any redesign
 
 "L = 0.55" alone is meaningless. Good and bad exist only against a
