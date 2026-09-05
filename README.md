@@ -16,12 +16,12 @@ Tiers / Katmanlar: **[K]** proven/kanıtlanmış · **[H]** plausible hypothesis
 **[S]** speculative/spekülatif · **[R]** refuted/reddedildi (never deleted / silinmez) ·
 **[KKE]** critical control missing/kritik kontrol eksik · **[Y]** misleading/yanıltıcı.
 
-> **Status: v0.3 `[H]` / `[KKE]`.** One self-validation run has happened:
+> **Status: v0.4 `[H]` / `[KKE]`.** One self-validation run has happened:
 > it found four real defects in the Layer-A scanner, refuted one design
 > decision on contact with a real app, and produced no `[K]` about that
 > app — which is the designed behaviour, not a shortfall. The gates, the
 > walkthrough and every behavioural metric remain untested.
-> **Statü: v0.3 `[H]` / `[KKE]`.** Bir öz-doğrulama koşusu yapıldı: Katman-A
+> **Statü: v0.4 `[H]` / `[KKE]`.** Bir öz-doğrulama koşusu yapıldı: Katman-A
 > tarayıcısında dört gerçek kusur bulundu, bir tasarım kararı gerçek bir
 > uygulamayla temasta çürüdü ve o uygulama hakkında hiç `[K]` üretilmedi —
 > ki bu tasarlanmış davranıştır, eksiklik değil. Kapılar, walkthrough ve

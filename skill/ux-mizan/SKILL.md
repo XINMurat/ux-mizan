@@ -9,7 +9,7 @@ metadata:
 
 # ux-mizan — Evidence-Tiered UX Auditing
 
-**Status: v0.1 `[H]` / `[KKE]`.** This skill has not yet produced a good
+**Status: v0.4 `[H]` / `[KKE]`.** This skill has not yet produced a good
 audit of a real application. Every architectural decision in it is `[H]`
 until it does. Say this in every deliverable — "the skill produced it" is
 not evidence, and the authority illusion is this skill's own risk #3.

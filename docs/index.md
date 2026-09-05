@@ -14,7 +14,7 @@ description: "A Claude skill that audits experience with the same discipline Miz
 [İskele](https://github.com/XINMurat/Iskele) ·
 [**the family · aile**](https://xinmurat.github.io/)
 
-> **Status: v0.2 `[H]` / `[KKE]`.** One self-validation run has happened.
+> **Status: v0.4 `[H]` / `[KKE]`.** One self-validation run has happened.
 > It tested the Layer-A scripts and refuted one design decision; the gates,
 > the walkthrough and every behavioural metric remain untested.
 
