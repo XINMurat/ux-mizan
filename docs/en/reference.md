@@ -13,7 +13,7 @@ so it cannot drift from what actually runs.
 | Cognitive-walkthrough template and its blind spots | [`references/walkthrough.md`](../../skill/ux-mizan/references/walkthrough.md) |
 | Metric battery, applicability matrix, lostness, baselines, instrumentation plan | [`references/metrics.md`](../../skill/ux-mizan/references/metrics.md) |
 | Gate 3, redesign, spec handoff, what a two-model handoff cannot promise | [`references/handoff.md`](../../skill/ux-mizan/references/handoff.md) |
-| Recovery ramps R-00…R-12, the model failure classes, the closing scorecard | [`references/recovery.md`](../../skill/ux-mizan/references/recovery.md) |
+| Recovery ramps R-00…R-13, the model failure classes, the closing scorecard | [`references/recovery.md`](../../skill/ux-mizan/references/recovery.md) |
 | Registry format and the rules in comment form | [`schemas/ux-registry.yaml`](../../skill/ux-mizan/schemas/ux-registry.yaml) |
 
 ## Evidence tiers

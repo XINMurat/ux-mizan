@@ -309,7 +309,7 @@ an audit, tiers in place, judgment gone.
 
 ## References
 
-- `references/recovery.md` — the twelve recovery ramps (R-00…R-12) for
+- `references/recovery.md` — the recovery ramps (R-00…R-13) for
   when the audit itself goes wrong, the model failure classes they exist
   for, and the closing process scorecard.
 - `references/gates.md` — the five gates: question sets, defaults,

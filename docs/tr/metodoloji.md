@@ -407,11 +407,13 @@ uzun oturum unutur.
 | **R-10** | Belirsizlik / docs-kod çelişkisi | Varsayma, boş elle sorma (öneri kuralı) | gates.md, U7 |
 | **R-11** | Redesign'i geri alma | İleri sar; ölçüm **yeni** baseline'dır | U4, handoff.md |
 | **R-12** | Hedef tutmadı | Ölç, **tek** değişiklik, aynı aletle yeniden ölç | U8, metrics.md |
+| **R-13** | Kullanıcı, denetimin yanından geçtiği şeye çarptı | Kaçağı **kaydet**, sonra teşhis et; "hangi kontrol bunu yakalamalıydı?" — susan kontrolü adlandır ya da artık var olanı yaz | Çizelgedeki *Kaçan* satırı, R-11, U7 |
 
 **Model hata sınıfları.** Rampalar çare, bunlar hastalık: uydurma · sessiz
 boşluk doldurma · bulgu enflasyonu · totolojik ölçüm · kendi çıktısını onaylama
 · iyimser raporlama · eşik yumuşatma · kapsam kayması · sahte onarım · bağlam
-çürümesi. Model bunları seçmez; hem üretip hem yargılayan bir tarafın işe yarar
+çürümesi · **sınıfsız kaçak** (kullanıcı buldu, ekran düzeltildi, bir sonraki
+denetimin neye baktığı değişmedi). Model bunları seçmez; hem üretip hem yargılayan bir tarafın işe yarar
 görünme baskısı altındaki davranışıdır — tek güvenilir savunma, fark eden bir
 yapıdır.
 

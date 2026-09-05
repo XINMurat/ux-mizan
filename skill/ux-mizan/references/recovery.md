@@ -41,6 +41,7 @@ they are properties of a producer that is also the judge.
 | **Scope creep** | The audit drifts onto flows Gate 0 never ranked, because they were interesting | R-07 |
 | **Fake repair** | A "fix" that changes the finding's wording until it stops failing validation | R-04 |
 | **Context decay** | Hour three: tiers still in place, judgment gone, everything reads `[H]` by habit | R-09 |
+| **Escape without a class** | A user found it, the screen got fixed, and nothing changed about what the next audit walks or checks. The scorecard counts it; a count is not a loop | R-13 |
 
 A model does not choose these. They are what a producer-judge does under
 pressure to look useful, and the only reliable defence is a structure that
@@ -393,6 +394,53 @@ before collection), U8.
 
 ---
 
+## R-13 — A user hit something the audit walked past
+
+**TRIGGER.** A usability problem surfaced after this audit closed — a
+support ticket, a session recording, someone watching a real user, a
+complaint — and it sits on a flow this audit had locked and walked. Also
+fires on the quieter version: a lesson written down as "worth checking next
+time" that no check ever received.
+
+**FIRST MOVE.** Record it as an escape before diagnosing it. The pull is to
+fix the screen and move on; the fix belongs to the product, the escape
+belongs to the method, and only the first of those normally gets written
+down.
+
+Then answer one question, and do not let it be skipped: **which check
+should have caught this?**
+
+- **A check exists and stayed silent.** Name it — a walkthrough principle,
+  a `structural_checks.py` rule, a metric on that flow. The finding is
+  about this run, not about the method: the flow was walked past, or the
+  check was run and misread, or the metric was not in
+  `applicable_metrics`. "We never walked F-007's error path" is a real
+  answer and a better one than a new rule nobody needs.
+- **No check covers it.** Then write the one that now does, as something
+  that can fire on the next audit: a walkthrough question, a structural
+  rule, or a metric added to that flow's `applicable_metrics`. A class that
+  only matches this ticket catches this ticket and nothing else.
+
+**FORBIDDEN.** Closing an escape with the redesign alone. Counting it in
+the scorecard's **Escaped** row and stopping there — the row exists to be
+consumed by this ramp, not to be admired. Quietly widening the closed
+audit's coverage to include the flow you missed: the escape is evidence
+that the coverage claim was wrong, and revising it visibly (R-11) is the
+honest move.
+
+**WHY IT IS THE ONE THAT MATTERS HERE.** Every other ramp fires on
+something you can see from inside the audit. This one fires on the only
+signal that comes from outside it, and a UX audit needs that signal more
+than most: the model walks flows it can reach, in an order it chooses,
+without the user's goal, history or hurry. The gap between that and a real
+session is exactly where escapes live.
+
+**BACKED BY.** The scorecard's **Escaped** row, R-11 (rolling back a
+claim), U7 (a premise that moved), Gate 0's locked flow list — an escape on
+an unlocked flow is a Gate-0 finding, not an audit failure.
+
+---
+
 ## Closing an audit: the process scorecard
 
 Fill this in when a cycle closes — after Gate 4, or when the engagement
@@ -408,7 +456,7 @@ is not a failure, a hidden number is.
 | **`[KKE]` still open at close** | | Controls never run. This is what the audit does not know, stated as a number. |
 | **Ramps used** | | Which R-nn fired. A run that used none either went perfectly or did not notice. |
 | **Promotions to `[K]`** | | How much of the audit actually reached evidence, vs. shipped as hypothesis. |
-| **Escaped** | | Problems found later that this audit's flows covered and its checks missed. The only measure that comes from outside the audit — and the only one that cannot be gamed from inside it. |
+| **Escaped** | | Problems found later that this audit's flows covered and its checks missed. The only measure that comes from outside the audit — and the only one that cannot be gamed from inside it. Each one goes through **R-13** and comes out naming a check: the one that stayed silent, or the one that now exists. A number here that never became a check is the method watching itself fail. |
 
 **Reading:** two or three sentences. Not "the audit went well" — what
 would you do differently on the next one, and which number says so.
