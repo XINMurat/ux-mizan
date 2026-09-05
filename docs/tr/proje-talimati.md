@@ -81,7 +81,7 @@ sonra teşhis etmek. Baseline'sız sayı raporlamak.
 
 Dürüst olmak gerekirse üç şey:
 
-1. **Sert kurallar.** U1–U12 bir betikte yaşar. Bu talimat onları
+1. **Sert kurallar.** U1–U13 bir betikte yaşar. Bu talimat onları
    *anlatır*; uygulayamaz. Talimat metni, host'un başka talimatlarıyla
    pazarlık edilebilir — betik edilemez.
 2. **Metrik uygulanabilirlik matrisi.** Altı `app_type` ve her birinin

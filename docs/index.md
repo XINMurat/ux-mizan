@@ -14,7 +14,7 @@ description: "A Claude skill that audits experience with the same discipline Miz
 [İskele](https://github.com/XINMurat/Iskele) ·
 [**the family · aile**](https://xinmurat.github.io/)
 
-> **Status: v0.4 `[H]` / `[KKE]`.** One self-validation run has happened.
+> **Status: v0.5 `[H]` / `[KKE]`.** One self-validation run has happened.
 > It tested the Layer-A scripts and refuted one design decision; the gates,
 > the walkthrough and every behavioural metric remain untested.
 
@@ -47,7 +47,7 @@ automatic instrument produce `[K]` (**Layer B**).
 - **Metrics gated by `app_type`.** Lostness on a single-canvas tool is a
   category error and fails validation. Six app types, each switching a
   metric *off* — a taxonomy that only adds is decoration.
-- **Rules in a script, not in prose.** `ux_validate.py` enforces U1–U12
+- **Rules in a script, not in prose.** `ux_validate.py` enforces U1–U13
   identically in every host. Whatever is enforced only by a paragraph is
   negotiable by the host's paragraphs.
 
@@ -88,7 +88,7 @@ yalnızca gerçek kullanıcıdan ya da otomatik bir hakemden gelir
 - **`app_type`'a kapılı metrikler.** Tek-tuval bir araçta lostness bir
   kategori hatasıdır ve doğrulamadan geçmez. Altı tip, her biri bir
   metriği *kapatarak* — yalnızca ekleyen taksonomi süslemedir.
-- **Kurallar betikte, düzyazıda değil.** `ux_validate.py` U1–U12'i her
+- **Kurallar betikte, düzyazıda değil.** `ux_validate.py` U1–U13'i her
   host'ta aynı şekilde uygular. Yalnızca bir paragrafla korunan şey,
   host'un paragraflarıyla pazarlık edilebilir.
 

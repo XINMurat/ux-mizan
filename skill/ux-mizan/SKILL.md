@@ -4,12 +4,12 @@ description: Evidence-tiered UX auditing for applications — finds where users 
 license: MIT
 metadata:
   author: XINMurat
-  schema_version: "0.5"   # pinned to the schema banner by CI
+  schema_version: "0.6"   # pinned to the schema banner by CI
 ---
 
 # ux-mizan — Evidence-Tiered UX Auditing
 
-**Status: v0.4 `[H]` / `[KKE]`.** This skill has not yet produced a good
+**Status: v0.5 `[H]` / `[KKE]`.** This skill has not yet produced a good
 audit of a real application. Every architectural decision in it is `[H]`
 until it does. Say this in every deliverable — "the skill produced it" is
 not evidence, and the authority illusion is this skill's own risk #3.
@@ -126,24 +126,45 @@ finding on that flow is capped at `[H]`.
    unlike the rest — reads here exactly like one that is not. Any fix
    proposed from these signals answers the homogenisation question in
    writing; U10 already refuses one that does not.
-7. **Gate 2.** Put the candidate findings in front of the human BEFORE
+7. **Re-assemble — walk the PAIRS, not only the flows.** Steps 3–6 all walk
+   one flow, one screen or one file at a time, which is exactly why none of
+   them can see a defect that exists only while **two flows are active at
+   once**: each flow is correct alone, its tests pass alone, and the guarantee
+   that breaks belongs to neither. So build the pair list deliberately — for
+   each flow, the existing guarantees another flow can reach — and ask of each
+   pair: *does that guarantee still hold while both are live?* Two classes
+   break this way most often:
+   - **Signals derived from an absence** — "not yet read", "awaiting payment",
+     "untouched for 3 days". A second flow that creates a new state changes
+     what the absence means, silently.
+   - **Guarantees enforced call site by call site** — a rule applied correctly
+     on five screens is voided wholesale by a sixth surface, bulk export being
+     the classic one.
+
+   **Order counts:** some pairs are safe in one direction only, and the safe
+   direction is part of the finding. File the result as a `conjunction`
+   finding — both flows, the guarantee, the order — with the **heavier** flow
+   as the parent, because severity reads the weight from the parent (U13).
+   Until schema 0.6 this pass had nowhere to file its result, which is the
+   honest reason it was not in this procedure before.
+8. **Gate 2.** Put the candidate findings in front of the human BEFORE
    they enter the registry. This is where preregistration locks: a
    threshold written after the data is HARKing.
-8. **Write the registry.** Append each confirmed finding to
+9. **Write the registry.** Append each confirmed finding to
    `ux-registry.yaml` as it is settled — **the registry is the memory,
    the transcript is not.** Batching findings for a summary at the end
    loses them at the next context reset and pays for them on every turn
    until then.
-9. **Validate.** `python scripts/ux_validate.py ux-registry.yaml`. Fix
+10. **Validate.** `python scripts/ux_validate.py ux-registry.yaml`. Fix
    what it rejects; do not argue with it in prose.
-10. **Gate 3.** Before ANY redesign or model handoff, the human approves
+11. **Gate 3.** Before ANY redesign or model handoff, the human approves
    the diagnosis and the intended direction. What they approve is **not
    pixels** — it is the diagnosis, the priority frame, and the direction.
    Approving a mockup is approval theatre. `references/handoff.md`.
-11. **Instrument.** Emit the measurement plan: which metric, which
+12. **Instrument.** Emit the measurement plan: which metric, which
    instrument, what N, what decision rule — all locked before collection.
    `references/metrics.md`.
-12. **Gate 4.** Only real Layer-B data plus a human decision promotes
+13. **Gate 4.** Only real Layer-B data plus a human decision promotes
     anything to `[K]`. The validator will not let you write `[K]` without
     a resolving evidence artifact anyway (U1).
 
@@ -173,7 +194,10 @@ host's prose and a script is not.
 
 1. **Structural `[K]` lock (U1).** `tier == K` with no resolving
    `evidence_artifact_id`, or with model-side provenance, is REJECTED.
-2. **Flow primacy (U2).** `parent_flow_id` is mandatory and must resolve.
+2. **Flow primacy (U2).** `parent_flow_id` is mandatory and must resolve. A
+   defect that exists only across two flows is not an exception to this: it
+   names one parent and its pair in `conjunction` (U13, schema 0.6+), with the
+   heavier flow as the parent so severity cannot be chosen.
    Scoring a component in isolation is impossible at the schema level.
 3. **Auditable severity (U3).** `severity = failure_magnitude ×
    priority_weight × frequency`, recomputed by the validator, with
@@ -322,9 +346,9 @@ an audit, tiers in place, judgment gone.
 - `references/handoff.md` — Gate 3, the redesign and spec-handoff
   procedure, and what a two-model handoff can and cannot promise.
 - `schemas/ux-registry.yaml` — the two-table registry format and rules
-  U1–U12. Read the file at session start when one exists, APPEND rather
+  U1–U13. Read the file at session start when one exists, APPEND rather
   than overwrite, and enforce it with the validator, not by reading it.
-- `scripts/ux_validate.py` — U1–U12 without a model.
+- `scripts/ux_validate.py` — U1–U13 without a model.
 - `scripts/lostness.py` — per-flow lostness from a screen-visit log.
 - `scripts/structural_checks.py` — Layer-A proxies for React/TS: what is
   missing (states, feedback, labels, depth).

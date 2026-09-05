@@ -256,6 +256,70 @@ findings:
       The proposed fix here WAS the generic default ("flatten the nav"),
       and the data refused it. Worth remembering.
 
+  # UX-005 is the pair, and it is the reason U13 exists. Both flows are
+  # correct alone: sending an invoice works, reconciling a payment works.
+  # Held at once they void a guarantee neither of them owns -- the status a
+  # user reads is derived from an ABSENCE ("no payment recorded"), and a
+  # second flow that records payments without touching invoice status makes
+  # that absence mean two different things. No per-flow walkthrough can see
+  # this, and neither flow's own tests are wrong.
+  #
+  # It hangs off F-001, the heavier of the pair (1.0 vs 0.7): severity reads
+  # the weight from the parent, so U13 refuses the lighter one. Frequency is
+  # stated here; had it been omitted it would inherit min(4.0, 2.0) = 2.0,
+  # because a pair happens no more often than its rarer half.
+  - finding_id: "UX-005"
+    parent_flow_id: "F-001"
+    finding_type: "conjunction"
+    principle: "feedback"
+    location: "src/invoices/status.ts:64 with src/payments/reconcile.ts:30"
+    mechanism: >
+      The invoice list derives "awaiting payment" from the absence of a
+      payment row against that invoice. Reconciliation writes the payment
+      against the CLIENT, not the invoice, when the amounts do not match
+      exactly -- so a reconciled part-payment leaves the absence intact and
+      the invoice keeps reading "awaiting payment" to the person chasing it.
+    tier: "H"
+    refutation_condition: >
+      If a part-payment reconciled through the payments flow flips the
+      invoice out of "awaiting payment" for the sender, the pair holds and
+      this is refuted.
+    metric:
+      name: "task_success"
+      kind: "behavioural"
+      instrument: "moderated task sessions: chase an invoice that has a reconciled part-payment"
+      threshold_support: ">= 30% of participants chase an already-part-paid invoice"
+      threshold_refute: "< 10%"
+    min_n:
+      n: 8
+      decision_rule: "one batch of 8, locked before the sessions run"
+    evidence_artifact_id: null
+    source_provenance: "walkthrough"
+    gate_provenance_version: 1
+    failure_magnitude: 0.4
+    frequency: 2.0
+    severity: 0.8
+    status: "open"
+    review_by: "2026-11-30"
+    owner: "billing"
+    fix: >
+      Do not derive the status from an absence: write an explicit
+      payment_state on the invoice that reconciliation must set. The
+      alternative -- making reconciliation always attach to an invoice --
+      was rejected because part-payments legitimately have no single one.
+    self_check_homogenisation: >
+      The generic default here would be "add a badge". The fix proposed is
+      a model change, not a surface one, precisely because the badge would
+      still be reading the same absence.
+    conjunction:
+      with_flow_id: "F-002"
+      guarantee: >
+        An invoice that has been paid, in whole or in part, never reads as
+        "awaiting payment" to the person chasing it.
+      order_sensitive: false
+      required_order: ""
+      gate_provenance_version: 1
+
 evidence_artifacts:
   - artifact_id: "EV-001"
     kind: "moderated-session"

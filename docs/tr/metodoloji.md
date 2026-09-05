@@ -211,7 +211,7 @@ bulgular `[H]`'de tavanlanır. Kendi önerini cevap gibi kaydetmek, U7'nin
 dosyaya ekleyin. Sona saklamak, bir sonraki bağlam sıfırlamasında kaybetmek
 ve o ana kadar her turda bedelini ödemek demektir.
 
-Sert kuralların (U1–U12) tam listesi: [`referans.md`](referans.md).
+Sert kuralların (U1–U13) tam listesi: [`referans.md`](referans.md).
 
 ## 5. Walkthrough — Katman A şablonu
 
@@ -237,6 +237,24 @@ onu koşan kişi zihinsel modeli zaten kurmuş olandır; tanıma hatalarını
 amaç hatalarından çok daha güvenilir bulur; **bilişsel yükü göremez** —
 uzun bir akışta biriken yük adım adım görünmezdir, her adım iyi görünür;
 ve zamanı göremez.
+
+**Ve çiftleri göremez.** Walkthrough tek akış yürür; yalnızca **iki akış
+aynı anda etkinken** var olan kusur bu yüzden görünmez: her akış tek başına
+doğrudur, testleri tek başına geçer, ve bozulan garanti hiçbirinin malı
+değildir. Bu yüzden akışlar yürüdükten sonra bir de **yeniden birleştirme
+pası** vardır: her akış için, başka bir akışın dokunabildiği mevcut
+garantileri listeleyin ve her çift için sorun — *ikisi birden etkinken o
+garanti hâlâ geçerli mi?* En sık kırılan iki sınıf: **yokluktan türetilen
+sinyaller** ("henüz okunmadı", "ödeme bekliyor") ve **tek tek çağrı
+yerinde uygulanan garantiler** (beş ekranda doğru uygulanan kural, altıncı
+toplu yüzeyle toptan geçersizleşir). **Sıra da önemlidir:** bazı çiftler
+yalnız tek yönde güvenlidir ve güvenli yön bulgunun parçasıdır.
+
+Sonucu `conjunction` bulgusu olarak yazın (şema 0.6+, U13): iki akış, bozulan
+garanti, ve asimetrikse gerekli sıra. Ana akış, ikisinin **ağır** olanıdır —
+severity ağırlığı ana akıştan okur, yani ana akışı serbestçe seçmek
+severity'yi serbestçe seçmek olurdu. Bu pasın 0.6'dan önce prosedürde
+olmamasının dürüst sebebi şudur: sonucunu yazacak yer yoktu.
 
 ## 6. Metrikler
 

@@ -44,6 +44,8 @@ Etiketler düzyazı değil, etikettir: her dilde iki dilli kalır.
 | **U9** | `min_n.n` ya da `min_n.decision_rule` olmadan `[K]` |
 | **U10** | `fix` öneren ama `self_check_homogenisation` yanıtlamayan bulgu |
 | **U11** | `kke_kind` olmayan ya da geçersiz olan `[KKE]` bulgusu; artık `[KKE]` olmayan bir kayıtta unutulmuş alan |
+| **U12** | `review_by` taşımayan açık bulgu; ya da tarihi geçtiği hâlde hiçbir karar kaydetmemiş olan |
+| **U13** | Çiftini, garantisini ya da güvenli sırasını belirtmeyen `conjunction` bulgusu; iki yarısı aynı akış olan ya da ana akışı ikisinin hafifi olan çift |
 
 `kke_kind` **hangi** kontrolün eksik olduğunu söyler: `control` (sonucu
 çevirebilecek karışıklık kontrolü koşmadı) · `independence` (iddiayı üreten
@@ -87,7 +89,7 @@ Matris hem şemada belgelidir hem `ux_validate.py` içinde
 
 | Betik | Ürettiği | Çıktısının katmanı |
 |---|---|---|
-| `ux_validate.py` | U1–U12 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
+| `ux_validate.py` | U1–U13 hükümleri, W1–W4 uyarıları | — (denetler, iddia etmez) |
 | `structural_checks.py` | Durum kapsamı, geri bildirim boşlukları, jenerik etiketler, nav derinliği, yetim rotalar | `[KKE]` — ne eksik |
 | `layout_signals.py` | Yerleşim izleri + her birinin izin verdiği davranışsal hipotez | iz `[KKE]`, iddia `[H]` |
 | `lostness.py` | Akış başına L; tamamlanan ve terk edilen ayrı raporlanır | anlam kazanması için Katman-B verisi gerekir |

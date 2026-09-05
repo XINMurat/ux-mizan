@@ -223,7 +223,7 @@
 registry:
   project: "<application name>"
   owner: "<who locks the gates — a person, not the model>"
-  schema_version: "0.4"
+  schema_version: "0.6"
   methodology: "ux-mizan v0.1"
   mode: "lite"            # lite | full  (Gate 1 decides; SKILL.md, Modes)
   created: "YYYY-MM-DD"
@@ -303,7 +303,23 @@ findings:
     frequency: null               # null -> inherit the parent flow's frequency
     severity: 0.0                 # RECOMPUTED by the validator (U3)
     status: "open"                # open | instrumented | confirmed | refuted | parked
-    review_by: "2099-01-01"       # MANDATORY while open (U12, from schema 0.5)
+    review_by: "2099-01-01"
+
+    # ---- CONJUNCTION (0.6+, U13). Leave it out for an ordinary finding; fill
+    # it when the defect exists ONLY while two flows are active at once. The
+    # parent above must be the HEAVIER of the two flows: severity reads the
+    # weight from the parent, so a free choice of parent is a free choice of
+    # severity. With no frequency stated, a pair inherits the MINIMUM of the
+    # two flows -- a pair happens no more often than its rarer half.
+    conjunction: null
+    # conjunction:
+    #   with_flow_id: ""            # the other flow; distinct, must resolve
+    #   guarantee: ""               # the guarantee that stops holding while
+    #                               # both are active -- name the guarantee,
+    #                               # not the symptom
+    #   order_sensitive: false      # true -> required_order is mandatory
+    #   required_order: ""
+    #   gate_provenance_version: 1       # MANDATORY while open (U12, from schema 0.5)
     # Deliberately far out: a blank form is not a live registry, so its
     # example date must never come due and redden CI on its own. In a real
     # finding this is weeks away, and U12 means it.

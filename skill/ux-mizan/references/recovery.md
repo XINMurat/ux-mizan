@@ -306,7 +306,7 @@ Gate 0 said from memory rather than reading the locked record.
 **OUTPUT.** A validated registry plus a handover block. A fresh run reads
 those two things and loses nothing but the chat.
 
-**BACKED BY.** SKILL.md step 7 (*the registry is the memory*), U12 (an
+**BACKED BY.** SKILL.md step 9 (*the registry is the memory*), U12 (an
 open finding with no `review_by`, or past it, forces a decision — the rule
 that makes drifting findings visible instead of merely old).
 

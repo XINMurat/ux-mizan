@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ux-mizan registry validator -- LLM-free static enforcement of U1-U11.
+ux-mizan registry validator -- LLM-free static enforcement of U1-U13.
 
 The rule that travels is the scripted one. Everything enforced only by
 SKILL.md prose is negotiable by the host's prose; everything in here
@@ -12,7 +12,7 @@ formula, append-only) live here and not in a paragraph.
 Two channels, for the reason Mizan and Kiyas both give: a tool that can
 only block teaches authors to write registries that do not trigger it.
 
-  * VIOLATIONS (U1-U11) block.
+  * VIOLATIONS (U1-U13) block.
   * WARNINGS (W1-W4) do not block by default. --strict promotes them.
 
 Usage:
@@ -62,7 +62,11 @@ VALID_KKE_KINDS = {
     "data",          # the measurement is designed but the data is not collected
     "validation",    # the INSTRUMENT is unvalidated (never run on a known-positive case)
 }
-VALID_FINDING_TYPES = {"flow-level", "component-contributing"}
+# "conjunction" (0.6+, U13): the defect exists only while two flows are active
+# at once. A TYPE rather than a flag, because it changes what the row must
+# carry -- a second flow, the guarantee that breaks, and the order when the
+# pair is asymmetric -- and a flag would have let half of that stay optional.
+VALID_FINDING_TYPES = {"flow-level", "component-contributing", "conjunction"}
 VALID_STATUS = {"open", "instrumented", "confirmed", "refuted"}
 
 # Metric applicability matrix (U6). Mirrors the comment block in
@@ -133,7 +137,7 @@ MSG = {
         "U1: {aid} kanit artefaktinda honesty_annexes yok -- kapsam ve orneklem serhleri zorunlu.",
     ),
     "U2_no_parent": (
-        "U2: finding {id} has no parent_flow_id. Flow primacy: a component cannot be scored in isolation.",
+        "U2: finding {id} has no parent_flow_id. Flow primacy: a component cannot be scored in isolation. (A defect that exists only across two flows is not an exception -- it names one parent and its pair in `conjunction`, U13.)",
         "U2: {id} bulgusunda parent_flow_id yok. Akis-primati: komponent izole puanlanamaz.",
     ),
     "U2_parent_unresolved": (
@@ -264,6 +268,49 @@ MSG = {
         "W3: flow {fid} has no measured baseline. Without one, no number on this flow is interpretable.",
         "W3: {fid} akisinin olculmus baseline'i yok. Baseline olmadan bu akistaki hicbir sayi yorumlanamaz.",
     ),
+    "U13_type_mismatch": (
+        "U13: finding {id} {why}. The `conjunction` block and finding_type 'conjunction' travel "
+        "together -- one without the other is a half-built row.",
+        "U13: {id} bulgusu {why}. `conjunction` blogu ile finding_type 'conjunction' birlikte "
+        "gider -- biri digeri olmadan yarim kalmis satirdir.",
+    ),
+    "U13_no_second_flow": (
+        "U13: conjunction finding {id} names no with_flow_id. A pair needs both halves; one flow "
+        "is an ordinary finding.",
+        "U13: {id} bilesim bulgusu with_flow_id belirtmiyor. Cift, iki yarisini ister; tek akis "
+        "siradan bir bulgudur.",
+    ),
+    "U13_second_unresolved": (
+        "U13: conjunction finding {id} points at flow {fid}, which does not exist in the flows table.",
+        "U13: {id} bilesim bulgusu {fid} akisina isaret ediyor; flows tablosunda boyle bir akis yok.",
+    ),
+    "U13_same_flow": (
+        "U13: conjunction finding {id} names flow {fid} on both sides. A pair is two DIFFERENT "
+        "flows held at once; a defect inside one flow is an ordinary finding.",
+        "U13: {id} bilesim bulgusu iki tarafta da {fid} akisini yaziyor. Cift, ayni anda gecerli "
+        "IKI FARKLI akistir; tek akisin icindeki kusur siradan bir bulgudur.",
+    ),
+    "U13_no_guarantee": (
+        "U13: conjunction finding {id} names no guarantee. Name the guarantee that stops holding "
+        "while both are active -- not the symptom it produces.",
+        "U13: {id} bilesim bulgusu garanti belirtmiyor. Ikisi birden etkinken gecerliligini "
+        "yitiren garantiyi yaz -- urettigi semptomu degil.",
+    ),
+    "U13_no_order": (
+        "U13: conjunction finding {id} is order_sensitive with no required_order. A pair that is "
+        "safe in one direction only carries that direction as part of the finding, not as an "
+        "implementation note.",
+        "U13: {id} bilesim bulgusu order_sensitive ama required_order yok. Yalnizca tek yonde "
+        "guvenli olan bir cift, o yonu uygulama notu olarak degil bulgunun parcasi olarak tasir.",
+    ),
+    "U13_weaker_parent": (
+        "U13: conjunction finding {id} hangs off flow {fid} (weight {low}) while its pair {ofid} "
+        "carries weight {high}. Severity reads the weight from the parent (U3), so a free choice "
+        "of parent is a free choice of severity -- the heavier flow is the parent.",
+        "U13: {id} bilesim bulgusu {fid} akisina asili (agirlik {low}), oysa cifti {ofid} "
+        "{high} agirlik tasiyor. Severity agirligi ana akistan okur (U3); ana akisi serbestce "
+        "secmek, severity'yi serbestce secmektir -- agir olan akis ana akistir.",
+    ),
     "U12_no_review_by": (
         "U12: finding {id} is open with no review_by date -- an open finding with no deadline is "
         "not tracked, it is stored. Set review_by when you open it.",
@@ -299,8 +346,8 @@ MSG = {
         "{path} bir ux-mizan registry'sine benzemiyor ('flows' anahtari yok).",
     ),
     "clean": (
-        "OK: {path} satisfies U1-U11.",
-        "TAMAM: {path} U1-U11 kurallarini sagliyor.",
+        "OK: {path} satisfies U1-U13.",
+        "TAMAM: {path} U1-U13 kurallarini sagliyor.",
     ),
 }
 
@@ -453,9 +500,56 @@ def check_findings(reg: dict, rep: Report) -> None:
         else:
             parent = flows[parent_id]
 
-        # ---- U6, second hop: the metric must be applicable to THIS flow
+        # ---- U13: the pair. A defect that exists only while two flows are
+        # active at once had nowhere to live until 0.6: U2 wanted exactly one
+        # parent, so the auditor either filed it against one flow and lost the
+        # pair, or did not file it. Nothing ever failed about that, because an
+        # absent capability makes no claim.
+        conj = finding.get("conjunction")
+        conj = conj if isinstance(conj, dict) else None
+        other_id = None
+        other = None
+        declared_conj = str(finding.get("finding_type") or "").strip() == "conjunction"
+        if conj is None and declared_conj:
+            rep.v("U13_type_mismatch", id=fid,
+                  why=("is typed 'conjunction' with no conjunction block"
+                       if rep.lang != "tr" else
+                       "'conjunction' tipinde ama conjunction blogu yok"))
+        elif conj is not None:
+            if not declared_conj:
+                rep.v("U13_type_mismatch", id=fid,
+                      why=("carries a conjunction block but is not typed 'conjunction'"
+                           if rep.lang != "tr" else
+                           "conjunction blogu tasiyor ama tipi 'conjunction' degil"))
+            other_id = str(conj.get("with_flow_id") or "").strip()
+            if not other_id:
+                rep.v("U13_no_second_flow", id=fid)
+            elif other_id not in flows:
+                rep.v("U13_second_unresolved", id=fid, fid=other_id)
+            elif other_id == parent_id:
+                rep.v("U13_same_flow", id=fid, fid=other_id)
+            else:
+                other = flows[other_id]
+            if not str(conj.get("guarantee") or "").strip():
+                rep.v("U13_no_guarantee", id=fid)
+            if conj.get("order_sensitive") is True and not str(conj.get("required_order") or "").strip():
+                rep.v("U13_no_order", id=fid)
+            # Severity anti-shopping: the weight comes from the parent, so the
+            # parent cannot be the author's pick. The heavier flow is the one.
+            if other is not None and parent is not None:
+                pw, ow = _num(parent.get("priority_weight")), _num(other.get("priority_weight"))
+                if pw is not None and ow is not None and ow > pw:
+                    rep.v("U13_weaker_parent", id=fid, fid=parent_id, low=pw,
+                          ofid=other_id, high=ow)
+
+        # ---- U6, second hop: the metric must be applicable to THIS flow.
+        # Widened for a pair: the guarantee that breaks may well be measured on
+        # the half that is not the parent, so either flow's list satisfies it.
         if parent is not None and metric_name:
-            if metric_name not in (parent.get("applicable_metrics") or []):
+            allowed = list(parent.get("applicable_metrics") or [])
+            if other is not None:
+                allowed += list(other.get("applicable_metrics") or [])
+            if metric_name not in allowed:
                 rep.v("U6_not_applicable", id=fid, metric=metric_name,
                       fid=parent_id)
 
@@ -467,7 +561,16 @@ def check_findings(reg: dict, rep: Report) -> None:
             weight = _num(parent.get("priority_weight"))
             freq = _num(finding.get("frequency"))
             if freq is None:
+                # A pair happens no more often than its rarer half. Inheriting
+                # the parent's frequency would overstate every pair made of one
+                # common flow and one rare one.
                 freq = _num(parent.get("frequency"))
+                if other is not None:
+                    ofreq = _num(other.get("frequency"))
+                    if freq is not None and ofreq is not None:
+                        freq = min(freq, ofreq)
+                    elif freq is None:
+                        freq = ofreq
             got = _num(finding.get("severity"))
             missing = [name for name, val in (
                 ("failure_magnitude", mag), ("priority_weight (parent flow)", weight),
@@ -480,7 +583,19 @@ def check_findings(reg: dict, rep: Report) -> None:
                 if abs(got - want) > SEVERITY_TOLERANCE:
                     rep.v("U3_severity_mismatch", id=fid, got=got, want=round(want, 6))
 
-        # ---- U7: gate provenance and premise drift
+        # ---- U7: gate provenance and premise drift. A pair rests on TWO
+        # premises, so an unlocked gate on either half caps the finding.
+        if other is not None:
+            olocked = _get(other, "gate_provenance", "gate_0", "locked_by")
+            if olocked != "human" and tier in {"K", "R"}:
+                rep.v("U7_unlocked_weight", fid=other_id, lock=olocked, id=fid,
+                      tier=tier)
+            ocur = _get(other, "gate_provenance", "version", default=1)
+            ohave = (conj or {}).get("gate_provenance_version", ocur)
+            if (_num(ohave) is not None and _num(ocur) is not None
+                    and ohave != ocur):
+                rep.v("U7_stale_premise", id=fid, have=ohave, fid=other_id, cur=ocur)
+
         if parent is not None:
             locked = _get(parent, "gate_provenance", "gate_0", "locked_by")
             if locked != "human" and tier in {"K", "R"}:
@@ -554,8 +669,11 @@ def check_findings(reg: dict, rep: Report) -> None:
     # ---- W1 / W2: shape of the audit as a whole
     if tiered and all(f.get("tier") == "K" for f in tiered):
         rep.w("W1_all_proven")
+    # A conjunction finding counts as flow-level here: it is about two flows at
+    # once, which is the opposite of the component nit W2 exists to catch.
     if _findings(reg) and not any(
-            f.get("finding_type") == "flow-level" for f in _findings(reg)):
+            f.get("finding_type") in ("flow-level", "conjunction")
+            for f in _findings(reg)):
         rep.w("W2_no_flow_level")
 
 
@@ -622,7 +740,7 @@ def load_baseline(ref: str, path: str, lang: str) -> dict | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="ux-mizan registry validator (U1-U11, W1-W4)")
+        description="ux-mizan registry validator (U1-U13, W1-W4)")
     parser.add_argument("registry", help="path to a ux-registry.yaml")
     parser.add_argument("--lang", choices=["en", "tr"], default="en")
     parser.add_argument("--against", metavar="GITREF",

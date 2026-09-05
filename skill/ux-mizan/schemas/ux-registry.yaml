@@ -1,5 +1,5 @@
 # =====================================================================
-# ux-mizan Registry Schema v0.5  (ux-registry.yaml)
+# ux-mizan Registry Schema v0.6  (ux-registry.yaml)
 # =====================================================================
 # Two linked tables. Flows are PREMISES (Gate 0 + Gate 1 fill them, a
 # human locks them). Findings are FINDINGS (the audit fills them, each
@@ -103,6 +103,44 @@
 #       H-UX006: if after three real registries nothing reads the field,
 #       it is bookkeeping that costs a line per entry -- drop it.
 #
+#   U13. A CONJUNCTION FINDING NAMES BOTH FLOWS. Some defects exist only
+#       while two flows are active AT ONCE: each flow is correct alone,
+#       and together one of them voids a guarantee the other relies on.
+#       Until 0.6 this schema could not hold such a finding at all -- U2
+#       required exactly one resolving parent_flow_id, so the auditor's
+#       only options were to file it against one flow (and lose the pair)
+#       or not file it. An absent capability makes no claim, which is why
+#       nothing ever failed about it.
+#
+#       A finding with a `conjunction` block MUST:
+#         * carry finding_type "conjunction" (and vice versa -- the type
+#           and the block travel together or the row is half-built)
+#         * name `with_flow_id`, DISTINCT from parent_flow_id, RESOLVING
+#         * name the `guarantee` that breaks while both are active
+#         * name `required_order` whenever order_sensitive is true --
+#           some pairs are safe in one direction only, and the safe
+#           direction is part of the finding, not an implementation note
+#
+#       SEVERITY ANTI-SHOPPING. parent_flow_id must be the flow with the
+#       HIGHER priority_weight of the pair. Severity reads the weight
+#       from the parent (U3), so a free choice of parent is a free choice
+#       of severity -- the same defect could be filed twice and score
+#       differently. The higher weight is the honest one: the pair breaks
+#       a guarantee that matters at least as much as the more important
+#       of the two jobs.
+#
+#       FREQUENCY. A pair happens no more often than its rarer half, so a
+#       conjunction finding that states no frequency inherits the MINIMUM
+#       of the two flows, not the parent's. Inheriting the parent's would
+#       systematically overstate every pair involving one common flow and
+#       one rare one.
+#
+#       U6 is widened for these findings ONLY: the metric may come from
+#       either flow's applicable_metrics, because the guarantee that
+#       breaks may be measured on the flow that is not the parent. U7's
+#       human-lock cap applies to BOTH flows -- a pair resting on an
+#       unlocked premise is capped at [H] exactly as a single flow is.
+#
 # WARNINGS (advisory; --strict promotes them to violations):
 #   W1. Every tiered finding is [K] — the flattery problem in a lab coat.
 #   W2. No flow-level finding exists: an audit made only of component
@@ -181,6 +219,12 @@
 #
 # =====================================================================
 # SCHEMA VERSIONS
+#   0.6 — adds the `conjunction` block on findings and activates U13: a
+#         defect that exists only while two flows are active at once finally
+#         has somewhere to live. Nothing existing changes: a finding without
+#         the block is validated exactly as before, and U2 still requires one
+#         resolving parent. What changes is that the auditor can now record a
+#         pair instead of choosing which half to lose.
 #   0.5 — adds `review_by` on findings and activates U12: an open finding
 #         carries a deadline, and a passed deadline forces a decision —
 #         extend with a reason, park it, or close it.
@@ -304,6 +348,24 @@ findings:
     severity: 0.0                 # RECOMPUTED by the validator (U3)
     status: "open"                # open | instrumented | confirmed | refuted | parked
     review_by: "2099-01-01"       # MANDATORY while open (U12, from schema 0.5)
+
+    # ---- CONJUNCTION (0.6+, U13). Omit entirely for an ordinary finding.
+    # Fill it when the defect exists ONLY while two flows are active at once:
+    # each flow is correct alone, and together one voids a guarantee the other
+    # leans on. Two classes break this way most often -- signals derived from
+    # an absence ("not yet read", "untouched for 3 days"), which change meaning
+    # the moment a new state exists, and guarantees enforced call site by call
+    # site, which any new bulk surface bypasses wholesale.
+    conjunction: null
+    # conjunction:
+    #   with_flow_id: "F-002"       # the other flow; distinct, must resolve
+    #   guarantee: >
+    #     The guarantee that stops holding while both are active. Name the
+    #     guarantee, not the symptom: "a muted thread still notifies on
+    #     handoff", not "the user missed something".
+    #   order_sensitive: false      # true -> required_order is mandatory
+    #   required_order: ""          # e.g. "reassign BEFORE anonymising"
+    #   gate_provenance_version: 1  # optional: the other flow's premise version
     # Deliberately far out: a blank form is not a live registry, so its
     # example date must never come due and redden CI on its own. In a real
     # finding this is weeks away, and U12 means it.

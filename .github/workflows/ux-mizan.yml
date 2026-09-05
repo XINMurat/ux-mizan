@@ -481,6 +481,81 @@ jobs:
             echo "::warning::Could not fetch Mizan's validator — the product registry was NOT checked."
           fi
 
+      - name: Self-test — U13 must reject a half-built pair and a shopped parent
+        run: |
+          set -e
+          # Until schema 0.6 a defect that exists only while two flows are live
+          # had nowhere to live: U2 wanted exactly one parent, so the auditor
+          # filed it against one flow and lost the pair, or did not file it.
+          # Nothing ever failed about that, because an absent capability makes
+          # no claim -- which is the failure class this rule closes.
+          tmp="$(mktemp --suffix=.yaml)"
+          cat > "$tmp" <<'YAML'
+          registry: {project: "P", owner: "human", schema_version: "0.6", mode: "lite"}
+          flows:
+            - flow_id: "F-001"
+              task_name: "light job"
+              app_type: "navigational-multiscreen"
+              priority_weight: 0.4
+              frequency: 8.0
+              applicable_metrics: [lostness]
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+            - flow_id: "F-002"
+              task_name: "heavy job"
+              app_type: "navigational-multiscreen"
+              priority_weight: 0.9
+              frequency: 1.0
+              applicable_metrics: [task_success]
+              gate_provenance: {version: 1, gate_0: {locked_by: "human"}}
+          findings:
+            - finding_id: "UX-001"
+              parent_flow_id: "F-001"
+              finding_type: "conjunction"
+              principle: "feedback"
+              location: "src/a.ts:1 with src/b.ts:2"
+              mechanism: "muting a thread silences the handoff alert"
+              tier: "H"
+              refutation_condition: "if a muted thread still surfaces the handoff"
+              metric: {name: "task_success", kind: "behavioural", instrument: "sessions", threshold_support: "0.9", threshold_refute: "0.6"}
+              source_provenance: "walkthrough"
+              status: "open"
+              review_by: "2099-01-01"
+              failure_magnitude: 0.5
+              severity: 0.2
+              conjunction: {with_flow_id: "F-002", order_sensitive: true}
+          YAML
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          # the guarantee is what the pair breaks -- without it the row is a mood
+          echo "$out" | grep -q "U13: conjunction finding UX-001 names no guarantee" || { echo "FAIL: U13 accepted a pair with no guarantee" >&2; exit 1; }
+          # a pair safe in one direction only carries that direction
+          echo "$out" | grep -q "order_sensitive with no required_order" || { echo "FAIL: U13 accepted order_sensitive with no order" >&2; exit 1; }
+          # severity reads the weight from the parent, so the parent is not a choice
+          echo "$out" | grep -q "U13: conjunction finding UX-001 hangs off flow F-001" || { echo "FAIL: U13 let the finding hang off the lighter flow" >&2; exit 1; }
+          echo "OK: U13 refused the half-built pair and the shopped parent."
+
+          # ...and the filled-in version passes, with the pair's frequency
+          # inherited from the RARER half (min(8.0, 1.0) = 1.0), so severity is
+          # 0.5 x 0.9 x 1.0 = 0.45 rather than 3.6.
+          python - "$tmp" <<'PY'
+          import io, re, sys
+          p = sys.argv[1]
+          s = io.open(p, encoding="utf-8").read()
+          s = s.replace('parent_flow_id: "F-001"', 'parent_flow_id: "F-002"')
+          s = s.replace('{with_flow_id: "F-002", order_sensitive: true}',
+                        '{with_flow_id: "F-001", guarantee: "a handoff always notifies", order_sensitive: false}')
+          s = s.replace("severity: 0.2", "severity: 0.45")
+          io.open(p, "w", encoding="utf-8").write(s)
+          PY
+          python skill/ux-mizan/scripts/ux_validate.py "$tmp"
+          echo "OK: the filled-in pair validates, and a pair is no more frequent than its rarer half."
+
+          # a type with no block, and a block with no type, are both half-built
+          sed -i 's/finding_type: "conjunction"/finding_type: "flow-level"/' "$tmp"
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out" | grep -q "U13: finding UX-001 carries a conjunction block" || { echo "FAIL: U13 accepted a block with no type" >&2; exit 1; }
+          echo "OK: the block and the type travel together."
+
       - name: The declared schema version agrees with the schema itself
         run: |
           set -e
