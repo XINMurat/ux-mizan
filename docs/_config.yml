@@ -1,6 +1,43 @@
 title: "ux-mizan — Evidence-Tiered UX Auditing"
-description: "A Claude skill that audits experience with the same discipline Mizan applies to claims: evidence tiers, human-locked gates, preregistered thresholds and an append-only registry. Bilingual TR/EN."
-theme: jekyll-theme-minimal
+description: "A Claude skill that audits experience with the same discipline Mizan applies to claims: evidence tiers, human-locked gates, preregistered thresholds and an append-only registry. Bilingual EN/TR."
 lang: en
-# jekyll-relative-links is enabled by default on GitHub Pages, so links to
-# .md files below resolve on both github.com and the published site.
+
+# --- what this site is, for the shared layout ---
+skill: "ux-mizan"
+emoji: "🔍"
+accent: "#2b4c6f"
+accent_dark: "#7ea9d0"
+repo: "https://github.com/XINMurat/ux-mizan"
+family_label: "the family"
+family_note: "Four skills that keep each other honest."
+license_note: "Code MIT · prose CC BY 4.0."
+
+nav_main:
+  - { name: "Overview", url: "/" }
+  - { name: "Quickstart", url: "/QUICKSTART.html" }
+
+nav_en:
+  - { name: "Usage guide", url: "/en/usage-guide.html" }
+  - { name: "Reference", url: "/en/reference.html" }
+  - { name: "Project instructions", url: "/en/project-instructions.html" }
+
+nav_tr:
+  - { name: "Kullanım kılavuzu", url: "/tr/kullanim-kilavuzu.html" }
+  - { name: "Metodoloji", url: "/tr/metodoloji.html" }
+  - { name: "Referans", url: "/tr/referans.html" }
+  - { name: "Proje talimatı", url: "/tr/proje-talimati.html" }
+
+# The layout lives in docs/_layouts/default.html and is byte-identical in all
+# four repositories. Everything that differs between them is here, in data --
+# four copies of a stylesheet drifting one at a time is the failure this family
+# names in its own documentation.
+#
+# NOTE: no `plugins:` key. Setting it would REPLACE the GitHub Pages default
+# plugin set, and two of those defaults are load-bearing here:
+# jekyll-optional-front-matter (most pages in docs/ carry none, and without it
+# they stop being pages at all) and jekyll-relative-links (the .md links between
+# them resolve on github.com and on the site because of it).
+
+defaults:
+  - scope: { path: "" }
+    values: { layout: "default" }
