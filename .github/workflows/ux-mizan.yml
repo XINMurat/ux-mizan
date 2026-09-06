@@ -556,6 +556,46 @@ jobs:
           echo "$out" | grep -q "U13: finding UX-001 carries a conjunction block" || { echo "FAIL: U13 accepted a block with no type" >&2; exit 1; }
           echo "OK: the block and the type travel together."
 
+      - name: The context budget holds (T0/T1 and the per-run sets)
+        run: |
+          set -e
+          # A skill costs tokens the way a dependency costs bytes: to everyone
+          # who installs it, on every cold start, forever. This one was designed
+          # to be cheap and the intention lived only in prose -- so between two
+          # releases the body grew and a run's load grew with it, and nothing
+          # failed, because a budget nobody checks is a preference. The ceilings
+          # in tools/token-budget.json are preregistered: raising one is a
+          # commit with a reason, which is the same rule this skill applies to
+          # every other threshold.
+          python tools/token_budget.py
+
+      - name: Self-test — the budget check actually fails when the budget is blown
+        run: |
+          set -e
+          # A gate that cannot fail is decoration, and this repo says so about
+          # tests in its own checklist. So: lower a ceiling below the measured
+          # value, confirm red, and confirm it names the tier it tripped on.
+          tmp="$(mktemp --suffix=.json)"
+          python - "$tmp" <<'PY'
+          import json, io, sys
+          cfg = json.load(io.open("tools/token-budget.json", encoding="utf-8"))
+          cfg["budgets"]["T1"] = 1
+          first_run = sorted(cfg.get("runs", {}))[0] if cfg.get("runs") else None
+          if first_run:
+              cfg["runs"][first_run]["ceiling"] = 1
+          io.open(sys.argv[1], "w", encoding="utf-8").write(
+              json.dumps(cfg, ensure_ascii=False))
+          print("first run set:", first_run)
+          PY
+          if out="$(python tools/token_budget.py --config "$tmp" 2>&1)"; then
+            echo "FAIL: the budget check passed a blown budget" >&2
+            echo "$out" >&2
+            exit 1
+          fi
+          echo "$out"
+          echo "$out" | grep -q "T1:" || { echo "FAIL: it failed, but not on T1" >&2; exit 1; }
+          echo "OK: the budget gate fails on the tier it names."
+
       - name: The declared schema version agrees with the schema itself
         run: |
           set -e

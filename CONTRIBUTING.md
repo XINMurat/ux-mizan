@@ -53,6 +53,21 @@ python skill/ux-mizan/scripts/ux_validate.py --strict examples/ux-registry.examp
 git config core.hooksPath tools/hooks
 ```
 
+### The context budget
+
+```bash
+python tools/token_budget.py     # tiers + per-run load sets vs. their ceilings
+```
+
+A skill costs tokens the way a dependency costs bytes: to everyone who installs
+it, on every cold start. The ceilings in `tools/token-budget.json` are
+**preregistered** — `T0` (the frontmatter description, in context in every
+session), `T1` (the SKILL.md body) and the per-run sets a mode actually loads.
+Raising one is a deliberate commit with the reason in the message
+(`--update` writes the current numbers); doing it to turn a red build green,
+without reading what moved, is threshold shopping. CI runs the check and a
+self-test that proves the gate can fail.
+
 ### Rebuilding `ux-mizan.skill`
 
 The packaged skill must stay byte-identical to `skill/ux-mizan/`; CI fails
@@ -122,6 +137,21 @@ pip install -r skill/ux-mizan/scripts/requirements.txt
 python skill/ux-mizan/scripts/ux_validate.py --lang tr --strict examples/ux-registry.example.yaml
 git config core.hooksPath tools/hooks
 ```
+
+### Bağlam bütçesi
+
+```bash
+python tools/token_budget.py     # katmanlar + koşu başına yük, tavanlarıyla
+```
+
+Bir skill, bir bağımlılığın bayt harcadığı gibi token harcar: kuran herkese,
+her soğuk başlangıçta. `tools/token-budget.json` içindeki tavanlar
+**önkayıtlıdır** — `T0` (her oturumda bağlamda olan frontmatter açıklaması),
+`T1` (SKILL.md gövdesi) ve bir modun fiilen yüklediği koşu kümeleri. Bir tavanı
+yükseltmek, gerekçesi mesajda olan bilinçli bir commit'tir (`--update` mevcut
+sayıları yazar); kırmızı build'i neyin büyüdüğünü okumadan yeşile çevirmek için
+yapmak eşik alışverişidir. CI hem kontrolü hem de kapının kırılabildiğini
+gösteren öz-testi koşar.
 
 ### Bu projenin istemediği şeyler
 

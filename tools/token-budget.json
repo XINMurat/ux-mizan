@@ -1,0 +1,35 @@
+{
+  "_note": "Ceilings are PREREGISTERED: written before the next change, not fitted to it. Raising one is a deliberate commit with a reason.",
+  "_runs_note": "The file lists under `runs` are a reading of SKILL.md's procedure, not a measurement of a live session. The scripts are executed, not read, so they are not counted.",
+  "skill_root": "skill/ux-mizan",
+  "chars_per_token": 3.6,
+  "budgets": {
+    "T0": 308,
+    "T1": 5649,
+    "T2": 20251
+  },
+  "runs": {
+    "audit": {
+      "files": [
+        "skill/ux-mizan/SKILL.md",
+        "skill/ux-mizan/references/walkthrough.md",
+        "skill/ux-mizan/references/metrics.md"
+      ],
+      "ceiling": 10137
+    },
+    "registry-write": {
+      "files": [
+        "skill/ux-mizan/SKILL.md",
+        "skill/ux-mizan/schemas/ux-registry.yaml"
+      ],
+      "ceiling": 12194
+    },
+    "recovery": {
+      "files": [
+        "skill/ux-mizan/SKILL.md",
+        "skill/ux-mizan/references/recovery.md"
+      ],
+      "ceiling": 11998
+    }
+  }
+}
