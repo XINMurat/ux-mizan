@@ -12,16 +12,25 @@ family_label: "the family"
 family_note: "Four skills that keep each other honest."
 license_note: "Code MIT · prose CC BY 4.0."
 
-nav_main:
+
+# One nav per language, each COMPLETE. Overview and Quickstart are the same
+# page in both languages (one file, two panes), so they appear in both lists
+# under that language's name. There is no separate "main" nav any more: it was
+# a second bar doing the first bar's job.
+#
+# The two lists are not the same length, and that is content rather than a
+# defect -- some documents exist in Turkish only. Shown one at a time, a
+# Turkish-only document reads as Turkish content instead of as a missing
+# translation, which is what it is.
+nav_en:
   - { name: "Overview", url: "/" }
   - { name: "Quickstart", url: "/QUICKSTART.html" }
-
-nav_en:
   - { name: "Usage guide", url: "/en/usage-guide.html" }
   - { name: "Reference", url: "/en/reference.html" }
   - { name: "Project instructions", url: "/en/project-instructions.html" }
-
 nav_tr:
+  - { name: "Genel bakış", url: "/" }
+  - { name: "Hızlı başlangıç", url: "/QUICKSTART.html" }
   - { name: "Kullanım kılavuzu", url: "/tr/kullanim-kilavuzu.html" }
   - { name: "Metodoloji", url: "/tr/metodoloji.html" }
   - { name: "Referans", url: "/tr/referans.html" }

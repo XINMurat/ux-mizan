@@ -6,7 +6,7 @@
 [![CI](https://github.com/XINMurat/ux-mizan/actions/workflows/ux-mizan.yml/badge.svg)](https://github.com/XINMurat/ux-mizan/actions/workflows/ux-mizan.yml)
 
 🌐 **Languages / Diller:** [English](#english) · [Türkçe](#türkçe)
-📚 **Docs:** [ux-mizan.github.io](https://xinmurat.github.io/ux-mizan/) ·
+📚 **Docs / Belgeler:** [xinmurat.github.io/ux-mizan](https://xinmurat.github.io/ux-mizan/) — EN/TR on every page · her sayfada EN/TR
 **Family:** [Mizan](https://github.com/XINMurat/Mizan) ·
 [Kıyas](https://github.com/XINMurat/Kiyas) ·
 [İskele](https://github.com/XINMurat/Iskele) ·
