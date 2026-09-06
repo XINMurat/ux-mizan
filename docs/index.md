@@ -5,15 +5,6 @@ description: "A Claude skill that audits experience with the same discipline Miz
 
 # ux-mizan
 
-**Evidence-tiered UX auditing, packaged as a Claude skill.**
-**Kanıt-katmanlı UX denetimi — bir Claude skill'i olarak paketlenmiş.**
-
-[Repository](https://github.com/XINMurat/ux-mizan) ·
-[Mizan](https://github.com/XINMurat/Mizan) ·
-[Kıyas](https://github.com/XINMurat/Kiyas) ·
-[İskele](https://github.com/XINMurat/Iskele) ·
-[**the family · aile**](https://xinmurat.github.io/)
-
 > **Status: v0.5 `[H]` / `[KKE]`.** One self-validation run has happened.
 > It tested the Layer-A scripts and refuted one design decision; the gates,
 > the walkthrough and every behavioural metric remain untested.
@@ -21,6 +12,16 @@ description: "A Claude skill that audits experience with the same discipline Miz
 ---
 
 <div id="pane-en" markdown="1">
+
+**Evidence-tiered UX auditing, packaged as a Claude skill.**
+
+[Repository](https://github.com/XINMurat/ux-mizan) ·
+[Mizan](https://github.com/XINMurat/Mizan) ·
+[Kıyas](https://github.com/XINMurat/Kiyas) ·
+[İskele](https://github.com/XINMurat/Iskele) ·
+[**the family**](https://xinmurat.github.io/)
+
+---
 
 ## English
 
@@ -56,14 +57,23 @@ automatic instrument produce `[K]` (**Layer B**).
 ### Read next
 
 - [Quickstart](QUICKSTART.md) — install, first audit, first validation
-- [Usage guide (EN)](en/usage-guide.md) — gates, modes, metrics, worked flow
-- [Reference (EN)](en/reference.md) — every rule, every metric, every file
-- [Project instructions (EN)](en/project-instructions.md) — paste into a Claude Project
-- [Kullanım kılavuzu (TR)](tr/kullanim-kilavuzu.md) · [Metodoloji](tr/metodoloji.md) · [Referans](tr/referans.md) · [Proje talimatı](tr/proje-talimati.md)
+- [Usage guide](en/usage-guide.md) — gates, modes, metrics, worked flow
+- [Reference](en/reference.md) — every rule, every metric, every file
+- [Project instructions](en/project-instructions.md) — paste into a Claude Project
 
 </div>
 
-<div id="pane-tr" markdown="1" hidden>
+<div id="pane-tr" markdown="1" class="pane-init">
+
+**Kanıt-katmanlı UX denetimi — bir Claude skill'i olarak paketlenmiş.**
+
+[Depo](https://github.com/XINMurat/ux-mizan) ·
+[Mizan](https://github.com/XINMurat/Mizan) ·
+[Kıyas](https://github.com/XINMurat/Kiyas) ·
+[İskele](https://github.com/XINMurat/Iskele) ·
+[**aile sayfası**](https://xinmurat.github.io/)
+
+---
 
 ## Türkçe
 
@@ -98,11 +108,10 @@ yalnızca gerçek kullanıcıdan ya da otomatik bir hakemden gelir
 
 ### Sırada
 
-- [Hızlı başlangıç](QUICKSTART.md)
+- [Hızlı başlangıç](QUICKSTART.md) — kurulum, ilk denetim, ilk doğrulama
 - [Kullanım kılavuzu](tr/kullanim-kilavuzu.md) — kurulum, kapılar, modlar, metrikler
 - [Metodoloji](tr/metodoloji.md) — skill'in tam Türkçe karşılığı: iki katman, beş kapı, walkthrough, metrikler, devir
 - [Referans](tr/referans.md) — her kural, her metrik, her dosya
 - [Proje talimatı](tr/proje-talimati.md) — Claude Project'e yapıştırılacak metin
-- [Usage guide (EN)](en/usage-guide.md)
 
 </div>

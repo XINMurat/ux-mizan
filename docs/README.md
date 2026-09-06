@@ -4,7 +4,7 @@
 
 Choose a language / Bir dil seçin:
 
-## 🇬🇧 English — [`en/`](en/)
+## 🇬🇧 English
 
 | Doc | What it covers |
 |---|---|
@@ -22,7 +22,7 @@ drift. A Turkish reader needs those five files in Turkish, and that is what
 [`tr/metodoloji.md`](tr/metodoloji.md) is. The asymmetry is the design, not
 a missing translation.
 
-## 🇹🇷 Türkçe — [`tr/`](tr/)
+## 🇹🇷 Türkçe
 
 | Belge | Kapsam |
 |---|---|
