@@ -51,6 +51,21 @@ body{margin:0; background:var(--bg); color:var(--ink);
 .top nav a:hover{color:var(--ink); text-decoration:underline; text-underline-offset:.18em}
 .top nav a[aria-current="page"]{color:var(--ink); font-weight:600}
 
+/* ---------- language control ---------- */
+.lang{display:flex; gap:.25rem; background:var(--bg-soft); border:1px solid var(--line);
+  border-radius:999px; padding:.15rem; margin-left:.25rem}
+.lang a,.lang button{
+  font:inherit; font-size:.75rem; font-family:var(--mono); letter-spacing:.04em;
+  border:0; background:transparent; color:var(--ink-soft); cursor:pointer;
+  padding:.28rem .65rem; border-radius:999px; text-decoration:none;
+  transition:background .15s,color .15s;
+}
+.lang [aria-current="true"],.lang [aria-pressed="true"]{
+  background:var(--card); color:var(--ink); font-weight:650;
+  box-shadow:0 1px 2px rgb(0 0 0/.10); outline:1px solid var(--line)}
+.lang a:hover,.lang button:hover{color:var(--ink)}
+.lang [aria-disabled="true"]{opacity:.35; cursor:default}
+
 /* ---------- doc nav ---------- */
 .docnav{border-bottom:1px solid var(--line-soft); background:var(--bg-soft)}
 .docnav .wrap{display:flex; gap:1.25rem; padding-top:.6rem; padding-bottom:.6rem;
@@ -128,6 +143,10 @@ footer .cols{display:flex; gap:2rem; flex-wrap:wrap; justify-content:space-betwe
       <a href="{{ site.repo }}">GitHub ↗</a>
       <a href="https://xinmurat.github.io/">{{ site.family_label | default: 'the family' }} ↗</a>
     </nav>
+    <div class="lang" id="langctl" role="group" aria-label="Language / Dil" hidden>
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="tr" aria-pressed="false">TR</button>
+    </div>
   </div>
 </header>
 
@@ -163,6 +182,10 @@ footer .cols{display:flex; gap:2rem; flex-wrap:wrap; justify-content:space-betwe
   </div>
 </footer>
 
+
+<script id="lang-pairs" type="application/json">
+[{% for p in site.pairs %}{"en":"{{ p.en }}","tr":"{{ p.tr }}"}{% unless forloop.last %},{% endunless %}{% endfor %}]
+</script>
 <script>
 // Markdown tables have no wrapper of their own, so a wide one would push the
 // whole page sideways on a phone. Wrapping them here keeps the overflow inside
@@ -174,6 +197,71 @@ document.querySelectorAll('.prose table').forEach(function (t) {
   t.parentNode.insertBefore(d, t);
   d.appendChild(t);
 });
+
+// The language control has two jobs and picks one per page:
+//
+//   * a page that carries BOTH languages (index, quickstart) gets a toggle --
+//     the same pane model the family page uses;
+//   * a page that has a counterpart FILE gets two links, with the current one
+//     marked;
+//   * a page with neither shows no control at all. A button for a translation
+//     that does not exist promises one.
+(function () {
+  var ctl = document.getElementById('langctl');
+  if (!ctl) return;
+  var buttons = ctl.querySelectorAll('button');
+  var panes = { en: document.getElementById('pane-en'), tr: document.getElementById('pane-tr') };
+
+  if (panes.en && panes.tr) {
+    ctl.hidden = false;
+    var show = function (lang) {
+      panes.en.hidden = lang !== 'en';
+      panes.tr.hidden = lang !== 'tr';
+      document.documentElement.lang = lang;
+      buttons.forEach(function (b) {
+        b.setAttribute('aria-pressed', String(b.dataset.lang === lang));
+      });
+      try { localStorage.setItem('lang', lang); } catch (e) {}
+    };
+    var stored = null;
+    try { stored = localStorage.getItem('lang'); } catch (e) {}
+    var hash = (location.hash || '').replace('#', '');
+    show((hash === 'tr' || hash === 'en') ? hash : (stored || 'en'));
+    buttons.forEach(function (b) {
+      b.addEventListener('click', function () { show(b.dataset.lang); });
+    });
+    return;
+  }
+
+  var raw = document.getElementById('lang-pairs');
+  var pairs = [];
+  try { pairs = JSON.parse(raw ? raw.textContent : '[]'); } catch (e) {}
+  // The published URLs end in .html and the pair table does not, so the
+  // extension comes off before comparing. Without it the table matches nothing
+  // and the control silently never appears -- which looks exactly like "this
+  // page has no counterpart", the one state it is supposed to mean.
+  var here = location.pathname
+    .replace(/index\.html$/, '').replace(/\.html$/, '').replace(/\/$/, '');
+  var norm = function (u) {
+    return (u || '').replace(/index\.html$/, '').replace(/\/$/, '');
+  };
+  var base = here.replace(/\/(en|tr)\/.*$/, '');
+  for (var i = 0; i < pairs.length; i++) {
+    var en = base + norm(pairs[i].en), tr = base + norm(pairs[i].tr);
+    if (here !== en && here !== tr) continue;
+    var current = here === en ? 'en' : 'tr';
+    ctl.hidden = false;
+    buttons.forEach(function (b) {
+      var href = b.dataset.lang === 'en' ? en + '.html' : tr + '.html';
+      var a = document.createElement('a');
+      a.textContent = b.textContent;
+      a.href = href;
+      a.setAttribute('aria-current', String(b.dataset.lang === current));
+      b.replaceWith(a);
+    });
+    return;
+  }
+})();
 
 // Mark the current page in both navs. Doing it here rather than in Liquid keeps
 // the layout identical across the four repositories -- the only thing that

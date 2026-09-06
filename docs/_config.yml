@@ -27,6 +27,17 @@ nav_tr:
   - { name: "Referans", url: "/tr/referans.html" }
   - { name: "Proje talimatı", url: "/tr/proje-talimati.html" }
 
+# Counterpart pages, for the language control on single-language documents.
+# Only real pairs are listed: a page whose translation does not exist shows no
+# control at all, because a button for a translation that does not exist
+# promises one. Mizan's en/reference has no Turkish twin and Kiyas' and
+# Iskele's Turkish-only documents have no English one -- those stay unpaired
+# and say so by staying silent.
+pairs:
+  - { en: "/en/usage-guide", tr: "/tr/kullanim-kilavuzu" }
+  - { en: "/en/reference", tr: "/tr/referans" }
+  - { en: "/en/project-instructions", tr: "/tr/proje-talimati" }
+
 # The layout lives in docs/_layouts/default.html and is byte-identical in all
 # four repositories. Everything that differs between them is here, in data --
 # four copies of a stylesheet drifting one at a time is the failure this family

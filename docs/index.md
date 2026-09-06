@@ -20,6 +20,8 @@ description: "A Claude skill that audits experience with the same discipline Miz
 
 ---
 
+<div id="pane-en" markdown="1">
+
 ## English
 
 Mizan audits claims. Kıyas generates ideas. İskele structures projects.
@@ -59,7 +61,9 @@ automatic instrument produce `[K]` (**Layer B**).
 - [Project instructions (EN)](en/project-instructions.md) — paste into a Claude Project
 - [Kullanım kılavuzu (TR)](tr/kullanim-kilavuzu.md) · [Metodoloji](tr/metodoloji.md) · [Referans](tr/referans.md) · [Proje talimatı](tr/proje-talimati.md)
 
----
+</div>
+
+<div id="pane-tr" markdown="1" hidden>
 
 ## Türkçe
 
@@ -100,3 +104,5 @@ yalnızca gerçek kullanıcıdan ya da otomatik bir hakemden gelir
 - [Referans](tr/referans.md) — her kural, her metrik, her dosya
 - [Proje talimatı](tr/proje-talimati.md) — Claude Project'e yapıştırılacak metin
 - [Usage guide (EN)](en/usage-guide.md)
+
+</div>
