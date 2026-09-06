@@ -36,6 +36,11 @@ Mizan audits claims. Kiyas generates ideas. Iskele structures projects.
 *confused* complaints — with the same discipline: tiers, preregistration,
 refutation conditions, an append-only registry.
 
+**Where ux-mizan starts:** with an application that exists and a complaint about
+it. It follows nothing — no registry, no backlog, no seeds — and what it
+produces goes two ways: a task for İskele's backlog, **and** a claim about the
+application that re-enters the Mizan ⇄ Kıyas loop.
+
 ### The load-bearing fact
 
 A model cannot MEASURE UX from code or screenshots. UX is behavioural. A
@@ -114,6 +119,11 @@ Mizan iddiaları denetler. Kiyas fikir üretir. İskele projeyi yapılandırır.
 **ux-mizan deneyimi denetler** — özellikle *kaybolma* ve *kafa karışıklığı*
 şikâyetlerini — aynı disiplinle: katmanlar, ön-kayıt, çürütme koşulları,
 yalnızca-eklenen registry.
+
+**ux-mizan nereden başlar:** var olan bir uygulama ve onun hakkında bir
+şikâyetle. Hiçbir şeyin ardından gelmez — ne registry, ne backlog, ne tohum — ve
+ürettiği iki yere birden gider: İskele'nin backlog'una bir görev **ve** uygulama
+hakkında, Mizan ⇄ Kıyas döngüsüne geri giren bir iddia.
 
 ### Taşıyıcı gerçek
 
