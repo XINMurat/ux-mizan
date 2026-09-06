@@ -281,9 +281,13 @@ document.querySelectorAll('.prose table').forEach(function (t) {
           : 'This document has no English version — the list switches to English';
       }
     });
+    // Anything still carrying the no-JS guard class gives it up on the first
+    // paint -- the panes, and the trailing sections that exist in both
+    // languages outside them.
+    document.querySelectorAll('.pane-init').forEach(function (el) {
+      el.classList.remove('pane-init');
+    });
     if (bilingual) {
-      panes.en.classList.remove('pane-init');
-      panes.tr.classList.remove('pane-init');
       panes.en.hidden = lang !== 'en';
       panes.tr.hidden = lang !== 'tr';
     }
