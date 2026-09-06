@@ -1,6 +1,6 @@
 # Quickstart
 
-**Status: v0.1 `[H]`.** The first real run is the self-validation run; treat
+**Status: v0.6 `[H]` / `[KKE]`.** The first real run is the self-validation run; treat
 its output as a test of the skill as much as of your app.
 
 ## 1. Install

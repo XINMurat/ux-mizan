@@ -1,6 +1,6 @@
 # Usage Guide
 
-**Status: v0.2 `[H]`.** One self-validation run has happened: it exercised
+**Status: v0.6 `[H]` / `[KKE]`.** One self-validation run has happened: it exercised
 the Layer-A scripts and refuted one design decision. The gates, the
 walkthrough and every behavioural metric remain untested.
 

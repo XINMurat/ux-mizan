@@ -8,7 +8,7 @@
 > konuşabilirsiniz — skill, kullanıcının dilinde yanıt vermeyi zaten kural
 > olarak içerir.
 >
-> **Statü: v0.3 `[H]` / `[KKE]`.** Bir öz-doğrulama koşusu yapıldı.
+> **Statü: v0.6 `[H]` / `[KKE]`.** Bir öz-doğrulama koşusu yapıldı.
 > Kapılar, walkthrough ve tüm davranışsal metrikler hâlâ sınanmadı.
 
 ---

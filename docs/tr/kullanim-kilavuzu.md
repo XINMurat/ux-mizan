@@ -1,6 +1,6 @@
 # Kullanım Kılavuzu
 
-**Statü: v0.2 `[H]`.** Bir öz-doğrulama koşusu yapıldı; Katman-A betikleri
+**Statü: v0.6 `[H]` / `[KKE]`.** Bir öz-doğrulama koşusu yapıldı; Katman-A betikleri
 sınandı ve bir tasarım kararı çürüdü. Kapılar, walkthrough ve tüm
 davranışsal metrikler hâlâ sınanmadı.
 

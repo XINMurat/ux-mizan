@@ -4,12 +4,13 @@ description: Evidence-tiered UX auditing for applications — finds where users 
 license: MIT
 metadata:
   author: XINMurat
+  version: "0.6"         # the skill's own version; every status line is pinned to it by CI
   schema_version: "0.7"   # pinned to the schema banner by CI
 ---
 
 # ux-mizan — Evidence-Tiered UX Auditing
 
-**Status: v0.5 `[H]` / `[KKE]`.** This skill has not yet produced a good
+**Status: v0.6 `[H]` / `[KKE]`.** This skill has not yet produced a good
 audit of a real application. Every architectural decision in it is `[H]`
 until it does. Say this in every deliverable — "the skill produced it" is
 not evidence, and the authority illusion is this skill's own risk #3.

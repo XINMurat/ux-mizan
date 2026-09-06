@@ -30,7 +30,7 @@ registry:
   created: "2026-08-22"
   notes: >
     Design hypotheses of the ux-mizan skill. The skill's status line
-    ("v0.3 [H]/[KKE]") is the summary of this file: one self-validation
+    ("v0.6 [H]/[KKE]") is the summary of this file: one self-validation
     run, one refuted decision, and no behavioural evidence yet.
 
 hypotheses:
