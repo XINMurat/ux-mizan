@@ -66,6 +66,7 @@ automatic instrument produce `[K]` (**Layer B**).
 
 - [Quickstart](QUICKSTART.md) — install, first audit, first validation
 - [Usage guide](en/usage-guide.md) — gates, modes, metrics, worked flow
+- [Methodology](en/methodology.md) — the core skill in full: two tiers, five gates, walkthrough, metrics, handoff
 - [Reference](en/reference.md) — every rule, every metric, every file
 - [Project instructions](en/project-instructions.md) — paste into a Claude Project
 

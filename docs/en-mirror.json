@@ -1,0 +1,8 @@
+{
+  "_comment": "Pages mirrored from the skill package by tools/sync_en_docs.py. The skill files are the source of truth; these entries only say where each one is published and what to call it.",
+  "pages": [
+    { "out": "methodology.md", "title": "Methodology — the core skill",
+      "tr": "docs/tr/metodoloji.md",
+      "sources": ["skill/ux-mizan/SKILL.md"] }
+  ]
+}

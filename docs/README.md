@@ -11,16 +11,19 @@ Choose a language / Bir dil seçin:
 | [usage-guide.md](en/usage-guide.md) | Install, the five gates, modes, metrics, the hard rules |
 | [project-instructions.md](en/project-instructions.md) | Block to paste into a Claude Project |
 | [reference.md](en/reference.md) | Index → every rule, every metric, every reference file |
+| [methodology.md](en/methodology.md) | The core skill in full — generated from `skill/ux-mizan/SKILL.md` |
 
-**Why English has three docs and Turkish has four.** The family's rule:
-**the skill body is English** — it has to be, for portability across
-hosts — **and the documentation is bilingual.** So an English reader gets
-the methodology from the skill itself
-([`../skill/ux-mizan/`](../skill/ux-mizan/)): `SKILL.md` plus its four
-reference files, which is the same text Claude loads and therefore cannot
-drift. A Turkish reader needs those five files in Turkish, and that is what
-[`tr/metodoloji.md`](tr/metodoloji.md) is. The asymmetry is the design, not
-a missing translation.
+**Why the methodology page is generated.** The family's rule: **the skill
+body is English** — it has to be, for portability across hosts — **and the
+documentation is bilingual.** The English methodology therefore lives in the
+skill itself ([`../skill/ux-mizan/`](../skill/ux-mizan/)), which is the same
+text Claude loads and so cannot drift; a Turkish reader gets it as
+[`tr/metodoloji.md`](tr/metodoloji.md), a hand-written mirror. For a long
+time the English side simply had no *page* for it, which read as a missing
+translation and was not one. [`en/methodology.md`](en/methodology.md) is now
+generated from the skill by `tools/sync_en_docs.py` and checked in CI — the
+skill stays the single source of truth, and both menus list the same
+documents.
 
 ## 🇹🇷 Türkçe
 

@@ -18,14 +18,18 @@ license_note: "Code MIT · prose CC BY 4.0."
 # under that language's name. There is no separate "main" nav any more: it was
 # a second bar doing the first bar's job.
 #
-# The two lists are not the same length, and that is content rather than a
-# defect -- some documents exist in Turkish only. Shown one at a time, a
-# Turkish-only document reads as Turkish content instead of as a missing
-# translation, which is what it is.
+# The two lists are now the same length. They were not, and the reading that
+# suggested itself -- "the English versions are missing" -- was wrong: those
+# documents already existed in English, inside the skill package, which the
+# site does not serve. What was missing was a page, not a translation. The
+# English ones under /en/ are generated from the skill files by
+# tools/sync_en_docs.py and checked in CI, so the skill stays the one source
+# of truth and the published copy cannot drift from it.
 nav_en:
   - { name: "Overview", url: "/" }
   - { name: "Quickstart", url: "/QUICKSTART.html" }
   - { name: "Usage guide", url: "/en/usage-guide.html" }
+  - { name: "Methodology", url: "/en/methodology.html" }
   - { name: "Reference", url: "/en/reference.html" }
   - { name: "Project instructions", url: "/en/project-instructions.html" }
 nav_tr:
@@ -39,13 +43,14 @@ nav_tr:
 # Counterpart pages, for the language control on single-language documents.
 # Only real pairs are listed: a page whose translation does not exist shows no
 # control at all, because a button for a translation that does not exist
-# promises one. Mizan's en/reference has no Turkish twin and Kiyas' and
-# Iskele's Turkish-only documents have no English one -- those stay unpaired
-# and say so by staying silent.
+# promises one. Every document now has both halves, so every page is paired;
+# a page added later without its counterpart still stays silent rather than
+# offering a button that leads nowhere.
 pairs:
   - { en: "/en/usage-guide", tr: "/tr/kullanim-kilavuzu" }
   - { en: "/en/reference", tr: "/tr/referans" }
   - { en: "/en/project-instructions", tr: "/tr/proje-talimati" }
+  - { en: "/en/methodology", tr: "/tr/metodoloji" }
 
 # The layout lives in docs/_layouts/default.html and is byte-identical in all
 # four repositories. Everything that differs between them is here, in data --
