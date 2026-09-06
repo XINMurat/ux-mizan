@@ -601,6 +601,7 @@ jobs:
           # served English under a Turkish name. Worse than a missing
           # translation, which can at least stay silent. The reasoning is in
           # the script's docstring.
+          pip install --quiet pyyaml   # the host job does not always install it
           python tools/check_lang_parity.py
 
       - name: Self-test — the parity check actually fails on a one-language page
