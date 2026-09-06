@@ -659,7 +659,7 @@ jobs:
           echo "$out" | grep -q "T1:" || { echo "FAIL: it failed, but not on T1" >&2; exit 1; }
           echo "OK: the budget gate fails on the tier it names."
 
-      - name: Every status line agrees with the skill's own version
+      - name: Every stated version agrees with the skill's own
         run: |
           set -e
           # Same rule as the schema pin below, applied to the other version
@@ -667,16 +667,16 @@ jobs:
           # evidence exists, written into ten files -- and unpinned it drifted
           # into four different numbers at once while the released version was
           # a fifth. The reasoning is in the script's own docstring.
-          python tools/check_status_pin.py
+          python tools/check_version_pin.py
 
-      - name: Self-test — the status pin actually fails on a stale line
+      - name: Self-test — the version pin actually fails on a stale line
         run: |
           set -e
           # A gate that cannot fail is decoration, and this repo says so about
           # everyone else's thresholds.
           cp docs/index.md /tmp/status-backup
           sed -i 's/Status: v[0-9][0-9]*\.[0-9][0-9]*/Status: v0.1/' docs/index.md
-          if python tools/check_status_pin.py; then
+          if python tools/check_version_pin.py; then
             cp /tmp/status-backup docs/index.md
             echo "FAIL: a stale status line went unnoticed" >&2; exit 1
           fi

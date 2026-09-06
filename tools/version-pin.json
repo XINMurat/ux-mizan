@@ -1,0 +1,21 @@
+{
+  "_comment": "Where the version is decided, and which prose repeats it. The status line -- 'Status: v0.x [H] / [KKE]' -- is a claim about how much evidence exists, not a label, which is why it is pinned. Only the number is pinned; the sentence beside it differs by audience on purpose.",
+  "source_file": "skill/ux-mizan/SKILL.md",
+  "version_key": "version",
+  "markers": [
+    "Status: v",
+    "Statü: v",
+    "STATUS: v"
+  ],
+  "files": [
+    "README.md",
+    "docs/index.md",
+    "docs/QUICKSTART.md",
+    "docs/en/usage-guide.md",
+    "docs/tr/kullanim-kilavuzu.md",
+    "docs/tr/metodoloji.md",
+    "skill/ux-mizan/SKILL.md",
+    "skill/ux-mizan/schemas/ux-registry.yaml",
+    "templates/ux-registry.yaml"
+  ]
+}
