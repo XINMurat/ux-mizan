@@ -127,7 +127,7 @@ says *where*, never *why*; it is per flow, never global; and Smith's
 0.4/0.5 cut-offs come from hypertext studies and are not validated for
 your app type — compare against your own baseline.
 
-## The hard rules (U1–U13)
+## The hard rules (U1–U14)
 
 | rule | what it does |
 |---|---|

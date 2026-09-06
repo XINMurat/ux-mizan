@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-ux-mizan registry validator -- LLM-free static enforcement of U1-U13.
+ux-mizan registry validator -- LLM-free static enforcement of U1-U14.
 
 The rule that travels is the scripted one. Everything enforced only by
 SKILL.md prose is negotiable by the host's prose; everything in here
@@ -12,7 +12,7 @@ formula, append-only) live here and not in a paragraph.
 Two channels, for the reason Mizan and Kiyas both give: a tool that can
 only block teaches authors to write registries that do not trigger it.
 
-  * VIOLATIONS (U1-U13) block.
+  * VIOLATIONS (U1-U14) block.
   * WARNINGS (W1-W4) do not block by default. --strict promotes them.
 
 Usage:
@@ -311,6 +311,24 @@ MSG = {
         "{high} agirlik tasiyor. Severity agirligi ana akistan okur (U3); ana akisi serbestce "
         "secmek, severity'yi serbestce secmektir -- agir olan akis ana akistir.",
     ),
+    "U14_missing_field": (
+        "U14: registry.cost_actual is missing {missing}. A cost number whose instrument, window "
+        "or attribution is unstated reads as though it had been counted rather than assigned, and "
+        "the assigning is the part a reader has to be able to check.",
+        "U14: registry.cost_actual eksik: {missing}. Enstrumani, penceresi ya da atifi "
+        "yazilmamis bir maliyet sayisi, atanmis degil sayilmis gibi okunur; okurun kontrol "
+        "edebilmesi gereken kisim tam da o atamadir.",
+    ),
+    "U14_bad_baseline": (
+        "U14: registry.cost_actual.baseline.kind is {got!r}; expected one of {allowed}.",
+        "U14: registry.cost_actual.baseline.kind {got!r}; beklenen: {allowed}.",
+    ),
+    "U14_no_baseline_note": (
+        "U14: baseline.kind is {kind!r} with no note. An arm nobody described is an arm nobody "
+        "can check -- say what it is and what it does NOT control for.",
+        "U14: baseline.kind {kind!r} ama not yok. Tarif edilmemis kol, kontrol edilemeyen koldur "
+        "-- ne oldugunu ve neyi kontrol ETMEDIGINI yaz.",
+    ),
     "U12_no_review_by": (
         "U12: finding {id} is open with no review_by date -- an open finding with no deadline is "
         "not tracked, it is stored. Set review_by when you open it.",
@@ -346,8 +364,8 @@ MSG = {
         "{path} bir ux-mizan registry'sine benzemiyor ('flows' anahtari yok).",
     ),
     "clean": (
-        "OK: {path} satisfies U1-U13.",
-        "TAMAM: {path} U1-U13 kurallarini sagliyor.",
+        "OK: {path} satisfies U1-U14.",
+        "TAMAM: {path} U1-U14 kurallarini sagliyor.",
     ),
 }
 
@@ -677,6 +695,43 @@ def check_findings(reg: dict, rep: Report) -> None:
         rep.w("W2_no_flow_level")
 
 
+COST_BASELINES = ("none", "internal-phase", "parallel-arm", "historical")
+
+
+def check_cost(reg: dict, rep: Report) -> None:
+    """U14 -- what the audit cost, stated so it can be read.
+
+    Kept out of every finding's tier on purpose: a finding is a claim about the
+    application, and whether auditing it was worth the money is a different
+    claim with a different arm. The one ratio this does not compute is
+    findings per unit cost -- finding inflation is this skill's first-named
+    failure mode, and paying attention to that ratio pays for it.
+    """
+    cost = (reg.get("registry") or {}).get("cost_actual")
+    if not isinstance(cost, dict):
+        return
+    missing = []
+    if not str(cost.get("instrument") or "").strip():
+        missing.append("instrument")
+    window = cost.get("window")
+    if not (isinstance(window, dict) and str(window.get("from") or "").strip()
+            and str(window.get("to") or "").strip()):
+        missing.append("window.from/to")
+    if not str(cost.get("attribution") or "").strip():
+        missing.append("attribution")
+    base = cost.get("baseline") if isinstance(cost.get("baseline"), dict) else {}
+    kind = str(base.get("kind") or "").strip().lower()
+    if not kind:
+        missing.append("baseline.kind")
+    if missing:
+        rep.v("U14_missing_field", missing=" / ".join(missing))
+    if kind and kind not in COST_BASELINES:
+        rep.v("U14_bad_baseline", got=kind, allowed=", ".join(COST_BASELINES))
+        return
+    if kind and kind != "none" and not str(base.get("note") or "").strip():
+        rep.v("U14_no_baseline_note", kind=kind)
+
+
 def check_artifacts(reg: dict, rep: Report) -> None:
     for artifact in _artifacts(reg):
         aid = artifact.get("artifact_id", "<no id>")
@@ -740,7 +795,7 @@ def load_baseline(ref: str, path: str, lang: str) -> dict | None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="ux-mizan registry validator (U1-U13, W1-W4)")
+        description="ux-mizan registry validator (U1-U14, W1-W4)")
     parser.add_argument("registry", help="path to a ux-registry.yaml")
     parser.add_argument("--lang", choices=["en", "tr"], default="en")
     parser.add_argument("--against", metavar="GITREF",
@@ -760,6 +815,7 @@ def main() -> int:
     check_flows(reg, rep)
     check_findings(reg, rep)
     check_artifacts(reg, rep)
+    check_cost(reg, rep)
 
     if args.against:
         baseline = load_baseline(args.against, args.registry, args.lang)

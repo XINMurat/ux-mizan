@@ -556,6 +556,43 @@ jobs:
           echo "$out" | grep -q "U13: finding UX-001 carries a conjunction block" || { echo "FAIL: U13 accepted a block with no type" >&2; exit 1; }
           echo "OK: the block and the type travel together."
 
+      - name: Self-test — U14 must reject an unreadable cost number
+        run: |
+          set -e
+          # What the audit cost is a measurement; whether it was WORTH it is a
+          # claim with a different arm, and the two are kept apart on purpose --
+          # a finding's tier is about the application, never about the audit's
+          # economics.
+          tmp="$(mktemp --suffix=.yaml)"
+          python - "$tmp" <<'PY'
+          import io, sys, yaml
+          d = yaml.safe_load(io.open("examples/ux-registry.example.yaml", encoding="utf-8"))
+          d["registry"]["cost_actual"] = {"tokens": {"input": 1000},
+                                          "baseline": {"kind": "none"}}
+          io.open(sys.argv[1], "w", encoding="utf-8").write(
+              yaml.safe_dump(d, allow_unicode=True, sort_keys=False))
+          PY
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out"
+          echo "$out" | grep -q "U14: registry.cost_actual is missing" || { echo "FAIL: U14 accepted a cost number with no instrument, window or attribution" >&2; exit 1; }
+          echo "OK: U14 refuses a number that reads as counted when it was assigned."
+
+          python - "$tmp" <<'PY'
+          import io, sys, yaml
+          p = sys.argv[1]
+          d = yaml.safe_load(io.open(p, encoding="utf-8"))
+          d["registry"]["cost_actual"].update({
+              "instrument": "tools/session_cost.py over local transcripts",
+              "window": {"from": "2026-09-01", "to": "2026-09-30"},
+              "attribution": "the three audit sessions, mapped by the researcher",
+              "baseline": {"kind": "internal-phase"}})
+          io.open(p, "w", encoding="utf-8").write(
+              yaml.safe_dump(d, allow_unicode=True, sort_keys=False))
+          PY
+          out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" || true)"
+          echo "$out" | grep -q "with no note" || { echo "FAIL: U14 accepted an undescribed arm" >&2; exit 1; }
+          echo "OK: U14 asks what the arm does not control for."
+
       - name: The context budget holds (T0/T1 and the per-run sets)
         run: |
           set -e

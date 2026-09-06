@@ -211,7 +211,7 @@ bulgular `[H]`'de tavanlanır. Kendi önerini cevap gibi kaydetmek, U7'nin
 dosyaya ekleyin. Sona saklamak, bir sonraki bağlam sıfırlamasında kaybetmek
 ve o ana kadar her turda bedelini ödemek demektir.
 
-Sert kuralların (U1–U13) tam listesi: [`referans.md`](referans.md).
+Sert kuralların (U1–U14) tam listesi: [`referans.md`](referans.md).
 
 ## 5. Walkthrough — Katman A şablonu
 

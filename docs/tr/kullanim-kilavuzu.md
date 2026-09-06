@@ -126,7 +126,7 @@ geçerlidir; *nerede*yi söyler, *neden*i söylemez; akış başınadır, global
 değil; ve 0,4/0,5 eşikleri hipertext çalışmalarından gelir, sizin
 uygulamanız için valide değildir.
 
-## Sert kurallar (U1–U13)
+## Sert kurallar (U1–U14)
 
 | kural | ne yapar |
 |---|---|

@@ -1,5 +1,5 @@
 # =====================================================================
-# ux-mizan Registry Schema v0.6  (ux-registry.yaml)
+# ux-mizan Registry Schema v0.7  (ux-registry.yaml)
 # =====================================================================
 # Two linked tables. Flows are PREMISES (Gate 0 + Gate 1 fill them, a
 # human locks them). Findings are FINDINGS (the audit fills them, each
@@ -141,6 +141,25 @@
 #       human-lock cap applies to BOTH flows -- a pair resting on an
 #       unlocked premise is capped at [H] exactly as a single flow is.
 #
+#   U14. WHAT THE AUDIT COST (0.7+). `registry.cost_actual` records what
+#       producing this audit consumed. Optional; when present it names its
+#       `instrument` (what produced the numbers -- a script, an invoice, a
+#       timesheet; "the model estimated it" is not one), its `window`, its
+#       `attribution` (how spend was mapped to THIS audit, and by whom -- a
+#       human judgement by construction) and `baseline.kind`, one of
+#       none | internal-phase | parallel-arm | historical. `none` is legal and
+#       honest and it forbids any [K] finding in the registry from being
+#       presented as evidence that the AUDIT was worth its cost: the finding's
+#       tier is about the app, never about the audit's economics.
+#
+#       ONE RATIO THIS SCHEMA REFUSES TO MAKE EASY: findings per unit cost.
+#       Finding inflation is the failure mode this skill names first -- twelve
+#       findings because twelve looks like work -- and a cost efficiency metric
+#       computed over finding COUNT pays for exactly that. If the number is
+#       ever divided, it is divided by findings that reached [K] on Layer-B
+#       data, which cannot be inflated by writing more rows. That ratio is
+#       lagging, thin, and honest, in that order.
+#
 # WARNINGS (advisory; --strict promotes them to violations):
 #   W1. Every tiered finding is [K] — the flattery problem in a lab coat.
 #   W2. No flow-level finding exists: an audit made only of component
@@ -219,6 +238,10 @@
 #
 # =====================================================================
 # SCHEMA VERSIONS
+#   0.7 — adds `registry.cost_actual` and U14: an audit may record what it cost,
+#         with the instrument, the window, the attribution and the comparison
+#         arm that make the number readable. Optional; an audit that records no
+#         cost pays nothing.
 #   0.6 — adds the `conjunction` block on findings and activates U13: a
 #         defect that exists only while two flows are active at once finally
 #         has somewhere to live. Nothing existing changes: a finding without
@@ -275,6 +298,31 @@ registry:
     v0.1 — this skill has not been validated on a real application.
     Every finding below is [H] or [KKE] unless it cites a Layer-B
     artifact.
+
+  # ---- What the AUDIT cost (0.7+, U14). Optional; omit when no cost claim is
+  # being made. This is the audit's own economics and it is kept separate from
+  # every finding's tier: a finding is about the application, never about
+  # whether auditing it was worth the money.
+  cost_actual: null
+  # cost_actual:
+  #   instrument: ""             # what PRODUCED the numbers -- a script, an
+  #                              # invoice, a timesheet. "The model estimated
+  #                              # it" is not an instrument.
+  #   window: { from: "", to: "" }
+  #   tokens: { input: 0, output: 0, cache_write: 0, cache_read: 0 }
+  #   human_hours: null          # usually the expensive half of a UX audit:
+  #                              # moderated sessions are people, not tokens
+  #   money: { amount: null, currency: "", rates_source: "" }
+  #   attribution: ""            # how spend was mapped to THIS audit, by whom
+  #   baseline:
+  #     kind: ""                 # none | internal-phase | parallel-arm
+  #                              #      | historical
+  #     note: ""                 # what the arm is, what it does NOT control for
+  #
+  # Do NOT divide this by the number of findings. Finding inflation is this
+  # skill's first-named failure mode, and cost-per-finding pays for it. If it
+  # is divided at all, divide by findings that reached [K] on Layer-B data --
+  # lagging, thin, and honest, in that order.
 
 # ---------------------------------------------------------------------
 # TABLE A — FLOWS (premises; Gate 0 + Gate 1 fill them, a human locks)

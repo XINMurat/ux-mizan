@@ -6,7 +6,7 @@
   "budgets": {
     "T0": 308,
     "T1": 5649,
-    "T2": 20251
+    "T2": 21100
   },
   "runs": {
     "audit": {
@@ -22,7 +22,7 @@
         "skill/ux-mizan/SKILL.md",
         "skill/ux-mizan/schemas/ux-registry.yaml"
       ],
-      "ceiling": 12194
+      "ceiling": 13000
     },
     "recovery": {
       "files": [
@@ -31,5 +31,6 @@
       ],
       "ceiling": 11998
     }
-  }
+  },
+  "_raised": "0.7 (U14): registry.cost_actual adds an eight-field block to the schema, which is loaded whenever a registry is written. The rule's reasoning stayed short and in place -- there is no Mode-5-equivalent reference to move it to -- so this is content, not commentary. Raised deliberately: T2 20251->21100, registry-write 12194->13000."
 }
