@@ -593,6 +593,29 @@ jobs:
           echo "$out" | grep -q "with no note" || { echo "FAIL: U14 accepted an undescribed arm" >&2; exit 1; }
           echo "OK: U14 asks what the arm does not control for."
 
+      - name: Every menu entry can keep the promise its language makes
+        run: |
+          set -e
+          # ux-mizan's quickstart sat in both menus and was English only, with
+          # none of the two-pane markup the other three use -- so pressing TR
+          # served English under a Turkish name. Worse than a missing
+          # translation, which can at least stay silent. The reasoning is in
+          # the script's docstring.
+          python tools/check_lang_parity.py
+
+      - name: Self-test — the parity check actually fails on a one-language page
+        run: |
+          set -e
+          # A gate that cannot fail is decoration.
+          cp docs/QUICKSTART.md /tmp/parity-backup
+          sed -i 's/id="pane-tr"/id="pane-removed"/' docs/QUICKSTART.md
+          if python tools/check_lang_parity.py; then
+            cp /tmp/parity-backup docs/QUICKSTART.md
+            echo "FAIL: a one-language menu entry went unnoticed" >&2; exit 1
+          fi
+          cp /tmp/parity-backup docs/QUICKSTART.md
+          echo "ok -- a one-language menu entry is caught"
+
       - name: The published English pages still match the skill package
         run: |
           set -e
