@@ -29,6 +29,14 @@ Mizan audits claims. Kıyas generates ideas. İskele structures projects.
 **ux-mizan audits experience** — specifically the *getting lost* and
 *confused* complaints — with the same discipline.
 
+**Where it starts:** with an application that exists and a complaint about
+it — "users get lost", "this screen is confusing", "they drop off here". It
+follows nothing: no registry, no backlog, no seeds. What it produces goes two
+ways, and both matter: a measured finding is a task for a backlog **and** a
+claim about the application — the first goes to İskele with acceptance criteria
+of its own, the second re-enters the audit loop, as a Mizan entry when it needs
+tiering or as a brief for Kıyas when the question is *why* users do that.
+
 ### The load-bearing fact
 
 A model cannot MEASURE UX from code or screenshots. UX is behavioural. A
@@ -80,6 +88,15 @@ automatic instrument produce `[K]` (**Layer B**).
 Mizan iddiaları denetler. Kıyas fikir üretir. İskele projeyi yapılandırır.
 **ux-mizan deneyimi denetler** — özellikle *kaybolma* ve *kafa karışıklığı*
 şikâyetlerini — aynı disiplinle.
+
+**Nereden başlar:** var olan bir uygulama ve onun hakkında bir şikâyetle —
+"kullanıcılar kayboluyor", "bu ekran karışık", "burada bırakıyorlar". Hiçbir
+şeyin ardından gelmez: ne registry, ne backlog, ne tohum. Ürettiği ise iki yere
+birden gider ve ikisi de önemlidir: ölçülmüş bir bulgu hem backlog için bir
+görev **hem de** uygulama hakkında bir iddiadır — birincisi kendi kabul
+kriteriyle İskele'ye, ikincisi denetim döngüsüne döner; katmanlanması
+gerekiyorsa Mizan girdisi, soru *kullanıcılar bunu neden yapıyor* ise Kıyas'a
+brief olarak.
 
 ### Taşıyıcı gerçek
 
