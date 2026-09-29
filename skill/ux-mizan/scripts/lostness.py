@@ -32,12 +32,21 @@ Sessions that never reach the flow's success screen are reported
 separately: an abandoned session has no completion path, and averaging it
 into L silently mixes "wandered" with "gave up".
 
+A completed session is counted UP TO its first success screen. What the user
+did after finishing is not the task: counting it made a perfect path followed
+by three screens of browsing read L=0.417 -- above Smith's 0.4 "lost" cut-off
+for someone who never took a wrong step. When every event carries `ts`, a
+session is ordered by it; otherwise by arrival. An event with no session_id
+or flow_id is refused: grouping those under "None" merged every such session
+into one and reported a lostness nobody had.
+
 USAGE
     python lostness.py events.jsonl --registry ux-registry.yaml
     python lostness.py events.jsonl --registry ux-registry.yaml --flow F-001
     python lostness.py events.jsonl --flow F-001 --R 4 --success /done
 
-Exit code 0 = computed, 2 = usage/parse error.
+Exit code 0 = computed, 2 = usage/parse error (every error path, not only
+some of them).
 """
 from __future__ import annotations
 
@@ -68,24 +77,32 @@ def lostness(n_distinct: int, s_total: int, r_minimum: int) -> float | None:
     return math.sqrt((n_distinct / s_total - 1) ** 2 + (r_minimum / n_distinct - 1) ** 2)
 
 
+def fail(msg: str) -> None:
+    """Exit 2, as the docstring promises. sys.exit(str) exits 1, which reads
+    like a computed result rather than a usage error."""
+    sys.stderr.write(msg + "\n")
+    sys.exit(2)
+
+
 def load_flow(registry_path: str, flow_id: str | None) -> dict:
     try:
         import yaml
     except ImportError:
-        sys.exit("ERROR: PyYAML is required to read a registry. pip install pyyaml")
+        fail("ERROR: PyYAML is required to read a registry. pip install pyyaml")
     with open(registry_path, encoding="utf-8") as handle:
         reg = yaml.safe_load(handle) or {}
     flows = [f for f in (reg.get("flows") or []) if isinstance(f, dict)]
     if flow_id:
         flows = [f for f in flows if f.get("flow_id") == flow_id]
     if not flows:
-        sys.exit(f"ERROR: no flow {flow_id or ''} found in {registry_path}")
+        fail(f"ERROR: no flow {flow_id or ''} found in {registry_path}")
     return flows[0] if flow_id else flows
 
 
 def read_events(path: str) -> dict[tuple[str, str], list[str]]:
-    """-> {(flow_id, session_id): [screen, screen, ...]} in arrival order."""
-    sessions: dict[tuple[str, str], list[str]] = defaultdict(list)
+    """-> {(flow_id, session_id): [screen, screen, ...]}, ordered by ts when
+    every event of the session has one, else by arrival."""
+    raw_sessions: dict[tuple[str, str], list[tuple]] = defaultdict(list)
     with open(path, encoding="utf-8") as handle:
         for line_no, raw in enumerate(handle, 1):
             raw = raw.strip()
@@ -94,10 +111,32 @@ def read_events(path: str) -> dict[tuple[str, str], list[str]]:
             try:
                 event = json.loads(raw)
             except json.JSONDecodeError as err:
-                sys.exit(f"ERROR: {path}:{line_no} is not valid JSON -- {err}")
-            key = (str(event.get("flow_id")), str(event.get("session_id")))
-            sessions[key].append(str(event.get("screen")))
+                fail(f"ERROR: {path}:{line_no} is not valid JSON -- {err}")
+            if not isinstance(event, dict):
+                fail(f"ERROR: {path}:{line_no} is not a JSON object")
+            missing = [k for k in ("flow_id", "session_id", "screen")
+                       if event.get(k) in (None, "")]
+            if missing:
+                fail(f"ERROR: {path}:{line_no} has no {', '.join(missing)} -- "
+                     "an event that cannot be placed in a session is refused, "
+                     "not grouped under 'None'")
+            key = (str(event["flow_id"]), str(event["session_id"]))
+            raw_sessions[key].append((event.get("ts"), line_no, str(event["screen"])))
+    sessions: dict[tuple[str, str], list[str]] = {}
+    for key, rows in raw_sessions.items():
+        if all(isinstance(ts, (int, float)) and not isinstance(ts, bool) for ts, _, _ in rows):
+            rows = sorted(rows, key=lambda r: (r[0], r[1]))
+        sessions[key] = [screen for _, _, screen in rows]
     return sessions
+
+
+def until_success(screens: list[str], success: str) -> list[str] | None:
+    """The screens up to and including the first success screen, or None if
+    the session never reached it."""
+    for i, screen in enumerate(screens):
+        if success in screen:
+            return screens[: i + 1]
+    return None
 
 
 def report_flow(flow: dict, sessions: dict, args) -> None:
@@ -129,7 +168,12 @@ def report_flow(flow: dict, sessions: dict, args) -> None:
     for (fid, session_id), screens in sessions.items():
         if fid != flow_id:
             continue
-        reached = any(str(success) in screen for screen in screens) if success else True
+        if success:
+            task = until_success(screens, str(success))
+            reached = task is not None
+            screens = task if reached else screens
+        else:
+            reached = True
         n_distinct = len(OrderedDict.fromkeys(screens))
         value = lostness(n_distinct, len(screens), int(r_minimum))
         row = (session_id, n_distinct, len(screens), value)
@@ -185,7 +229,7 @@ def main() -> int:
         flows = [{"flow_id": args.flow, "app_type": "navigational-multiscreen",
                   "canonical_path_R": args.R, "task_name": "(ad hoc)"}]
     else:
-        sys.exit("ERROR: pass --registry, or --flow with --R.")
+        fail("ERROR: pass --registry, or --flow with --R.")
 
     for flow in flows:
         report_flow(flow, sessions, args)
