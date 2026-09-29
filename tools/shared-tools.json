@@ -8,6 +8,7 @@
     "tools/check_vocabulary.py": "d2b7565b950f186658bc0fc4ca8246a1b4a994949d00b28358d5a8837257acd9",
     "tools/family-vocabulary.yaml": "89d456672e3f405d9bd4852980697532ba07ef731a08d272815096c89aab63f2",
     "tools/leak_check.py": "1f1beec6640fd4489f768ad44f6d2c971fd262e0d49847a884c7b089d209e217",
+    "tools/rule_hits.py": "8005cca4c26076a96ede132a21527fa596b04ced14c9ecc7751e4a4d2beb2419",
     "tools/sync_en_docs.py": "92769d6a60014282d2246ffc8cb420a49b8b058b570591356cdeb9bd2a30418e",
     "tools/sync_forbidden_terms.py": "2b3d6e3928d888a68fe38f44eaf7532c1a5743f842e572cf882a925cd658a2b2",
     "tools/token_budget.py": "47e20813d80677d9667a4ff7969ebeef218f9aeeae1d5ab97ed15243b7f794f5"
