@@ -11,7 +11,8 @@ records those blocks.
                          rule codes to .git/rule-hits.jsonl. Never fails the
                          hook; logging is not a gate.
     summary              counts per rule code from the local log.
-    export               writes counts only (no file names, no messages) to
+    export               writes counts only (no file names, no messages; per
+                         validator version as well as in total) to
                          rule-hits/<date>-<id>.json for you to commit; the site's
                          daily rule-health report reads that directory in all
                          four repositories.
@@ -23,6 +24,7 @@ from __future__ import annotations
 
 import collections
 import datetime
+import hashlib
 import json
 import os
 import subprocess
@@ -56,8 +58,14 @@ def cmd_log(validator: str, path: str) -> int:
             # exit 2: the file did not parse or is not this validator's kind.
             # That blocked the commit too, so it is counted, under PARSE.
             res = {"violations": [{"code": "PARSE"}]}
+        # Which validator version blocked: a copy that is never updated has
+        # fewer rules, and "R28 never fired" means nothing where R28 did not
+        # exist. The hash is the version, so a fork's edited copy is its own.
+        with open(validator, "rb") as fh:
+            vsha = hashlib.sha256(fh.read().replace(b"\r\n", b"\n")).hexdigest()[:12]
         rec = {"date": datetime.date.today().isoformat(),
                "validator": os.path.basename(validator),
+               "validator_sha": vsha,
                "violations": sorted({f["code"] for f in res.get("violations", []) if f.get("code")}),
                "warnings": sorted({f["code"] for f in res.get("warnings", []) if f.get("code")})}
         with open(log_path(), "a", encoding="utf-8") as fh:
@@ -72,7 +80,15 @@ def counts(recs: list[dict]) -> dict:
     for r in recs:
         v.update(r.get("violations", []))
         w.update(r.get("warnings", []))
-    return {"blocks": len(recs), "violations": dict(v), "warnings": dict(w)}
+    by: dict = {}
+    for r in recs:
+        key = f'{r.get("validator", "?")}@{r.get("validator_sha", "unknown")}'
+        b = by.setdefault(key, {"blocks": 0, "violations": collections.Counter()})
+        b["blocks"] += 1
+        b["violations"].update(r.get("violations", []))
+    return {"blocks": len(recs), "violations": dict(v), "warnings": dict(w),
+            "by_validator": {k: {"blocks": b["blocks"], "violations": dict(b["violations"])}
+                             for k, b in by.items()}}
 
 
 def main(argv: list[str]) -> int:
