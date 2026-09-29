@@ -1,0 +1,81 @@
+# Rule-pair fixtures for tools/rule_pairs.py (shared with Mizan and Kiyas).
+#
+# base + base_ops must be CLEAN under every rule. That is the conflict test:
+# every rule exercised below can be satisfied at once. Each mutation breaks
+# ONE thing and names the catalog code it expects; anything else it fires is
+# an overlap. base_ops lift the example to the newest schema (0.6) so the
+# review deadline (U12) and cost (U14) rules run too.
+validator: skill/ux-mizan/scripts/ux_validate.py
+args: ["{file}", "--as-of", "2026-09-29", "--strict"]
+codes: "^[UW]\\d+_"
+baseline_loader: load_baseline
+base: examples/ux-registry.example.yaml
+base_ops:
+  - { path: registry.schema_version, set: "0.6" }
+  - { path: findings.1.review_by, set: "2026-12-31" }
+  - path: registry.cost_actual
+    set:
+      instrument: "time tracker"
+      window: { from: "2026-07-10", to: "2026-07-20" }
+      attribution: "audit tag"
+      baseline: { kind: "historical", note: "the previous audit of this app" }
+
+mutations:
+  # --- flows
+  - { id: u6-unknown-type, target: U6_unknown_app_type, ops: [ { path: flows.1.app_type, set: "spaceship" } ] }
+  - { id: u6-illegal-metric, target: U6_illegal_for_type, ops: [ { path: flows.1.applicable_metrics, append: "lostness" } ] }
+  - { id: u7-no-provenance, target: U7_no_provenance, ops: [ { path: flows.1.gate_provenance, delete: true } ] }
+  - { id: w3-no-baseline, target: W3_no_baseline, ops: [ { path: flows.1.baseline, delete: true } ] }
+
+  # --- findings: UX-001 is the [K] one, UX-002 open [H], UX-003 [KKE], UX-005 conjunction
+  - { id: u5-no-refutation, target: U5_no_refutation, ops: [ { path: findings.1.refutation_condition, delete: true } ] }
+  - { id: u5-no-metric, target: U5_no_metric, ops: [ { path: findings.1.metric.name, delete: true } ] }
+  - { id: u5-no-instrument, target: U5_no_instrument, ops: [ { path: findings.1.metric.instrument, delete: true } ] }
+  - { id: u5-bad-kind, target: U5_bad_kind, ops: [ { path: findings.1.metric.kind, set: "vibes" } ] }
+  - { id: u2-no-parent, target: U2_no_parent, ops: [ { path: findings.1.parent_flow_id, delete: true } ] }
+  - { id: u2-unresolved, target: U2_parent_unresolved, ops: [ { path: findings.1.parent_flow_id, set: "F-009" } ] }
+  - { id: u6-not-applicable, target: U6_not_applicable, ops: [ { path: findings.1.metric.name, set: "step_abandonment" } ] }
+  - { id: u3-weight-restated, target: U3_weight_restated, ops: [ { path: findings.1.priority_weight, set: 1.0 } ] }
+  - { id: u3-missing-input, target: U3_missing_input, ops: [ { path: findings.1.severity, delete: true } ] }
+  - { id: u3-mismatch, target: U3_severity_mismatch, ops: [ { path: findings.1.severity, set: 3.0 } ] }
+  - { id: u7-unlocked-weight, target: U7_unlocked_weight, ops: [ { path: flows.0.gate_provenance.gate_0.locked_by, set: "model" } ] }
+  - { id: u7-stale-premise, target: U7_stale_premise, ops: [ { path: findings.1.gate_provenance_version, set: 0 } ] }
+  - { id: u1-no-artifact, target: U1_no_artifact, ops: [ { path: findings.0.evidence_artifact_id, delete: true } ] }
+  - { id: u1-unresolved, target: U1_artifact_unresolved, ops: [ { path: findings.0.evidence_artifact_id, set: "EV-404" } ] }
+  - { id: u1-bad-provenance, target: U1_bad_provenance, ops: [ { path: findings.0.source_provenance, set: "walkthrough" } ] }
+  - { id: u1-no-annex, target: U1_artifact_no_annex, ops: [ { path: evidence_artifacts.0.honesty_annexes, set: [] } ] }
+  - { id: u9-no-min-n, target: U9_no_min_n, ops: [ { path: findings.0.min_n.n, set: null } ] }
+  - { id: u9-no-rule, target: U9_no_rule, ops: [ { path: findings.0.min_n.decision_rule, delete: true } ] }
+  - { id: u8-no-baseline, target: U8_no_baseline, ops: [ { path: flows.0.baseline.values.first_click_accuracy, delete: true } ] }
+  - { id: u11-no-kind, target: U11_no_kke_kind, ops: [ { path: findings.2.kke_kind, delete: true } ] }
+  - { id: u11-bad-kind, target: U11_bad_kke_kind, ops: [ { path: findings.2.kke_kind, set: "mood" } ] }
+  - { id: u11-stray-kind, target: U11_stray_kke_kind, ops: [ { path: findings.1.kke_kind, set: "data" } ] }
+  - { id: u10-no-self-check, target: U10_no_self_check, ops: [ { path: findings.1.self_check_homogenisation, delete: true } ] }
+  - { id: u12-no-review-by, target: U12_no_review_by, ops: [ { path: findings.1.review_by, delete: true } ] }
+  - { id: u12-bad-date, target: U12_bad_date, ops: [ { path: findings.1.review_by, set: "soon" } ] }
+  - { id: u12-overdue, target: U12_review_overdue, ops: [ { path: findings.1.review_by, set: "2026-01-01" } ] }
+
+  # --- U13: the conjunction finding (UX-005, parent F-001, other F-002)
+  - { id: u13-type-mismatch, target: U13_type_mismatch, ops: [ { path: findings.4.conjunction, delete: true } ] }
+  - { id: u13-no-second, target: U13_no_second_flow, ops: [ { path: findings.4.conjunction.with_flow_id, delete: true } ] }
+  - { id: u13-second-unresolved, target: U13_second_unresolved, ops: [ { path: findings.4.conjunction.with_flow_id, set: "F-009" } ] }
+  - { id: u13-same-flow, target: U13_same_flow, ops: [ { path: findings.4.conjunction.with_flow_id, set: "F-001" } ] }
+  - { id: u13-no-guarantee, target: U13_no_guarantee, ops: [ { path: findings.4.conjunction.guarantee, delete: true } ] }
+  - { id: u13-no-order, target: U13_no_order, ops: [ { path: findings.4.conjunction.order_sensitive, set: true } ] }
+  - { id: u13-weaker-parent, target: U13_weaker_parent, ops: [ { path: flows.1.priority_weight, set: 1.5 }, { path: findings.2.severity, set: 1.2 } ] }  # UX-003 lives under F-002, its severity follows the weight
+
+  # --- U4 append-only (the base is the baseline)
+  - { id: u4-deleted, target: U4_deleted, baseline_is_base: true, ops: [ { path: findings.3, delete: true } ] }
+  - { id: u4-unrefuted, target: U4_unrefuted, baseline_is_base: true, ops: [ { path: findings.3.tier, set: "H" } ] }
+
+  # --- U14 cost
+  - { id: u14-no-window, target: U14_missing_field, ops: [ { path: registry.cost_actual.window, delete: true } ] }
+  - { id: u14-bad-baseline, target: U14_bad_baseline, ops: [ { path: registry.cost_actual.baseline.kind, set: "vibes" } ] }
+  - { id: u14-no-note, target: U14_no_baseline_note, ops: [ { path: registry.cost_actual.baseline.note, delete: true } ] }
+
+  # --- warnings
+  - { id: w1-all-proven, target: W1_all_proven, ops: [ { path: findings.4, delete: true }, { path: findings.3, delete: true }, { path: findings.2, delete: true }, { path: findings.1, delete: true } ] }
+  - { id: w2-no-flow-level, target: W2_no_flow_level, ops: [ { path: findings.4, delete: true }, { path: findings.2, delete: true }, { path: findings.0, delete: true } ] }
+  - { id: w4-orphan-open, target: W4_orphan_open, ops: [ { path: findings.1.owner, delete: true } ] }
+
+uncovered: {}

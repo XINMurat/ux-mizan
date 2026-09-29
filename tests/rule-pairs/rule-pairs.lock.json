@@ -1,0 +1,140 @@
+{
+ "base_fired": [],
+ "mutations": {
+  "u1-bad-provenance": [
+   "U1_bad_provenance"
+  ],
+  "u1-no-annex": [
+   "U1_artifact_no_annex"
+  ],
+  "u1-no-artifact": [
+   "U1_no_artifact"
+  ],
+  "u1-unresolved": [
+   "U1_artifact_unresolved"
+  ],
+  "u10-no-self-check": [
+   "U10_no_self_check"
+  ],
+  "u11-bad-kind": [
+   "U11_bad_kke_kind"
+  ],
+  "u11-no-kind": [
+   "U11_no_kke_kind"
+  ],
+  "u11-stray-kind": [
+   "U11_stray_kke_kind"
+  ],
+  "u12-bad-date": [
+   "U12_bad_date"
+  ],
+  "u12-no-review-by": [
+   "U12_no_review_by"
+  ],
+  "u12-overdue": [
+   "U12_review_overdue"
+  ],
+  "u13-no-guarantee": [
+   "U13_no_guarantee"
+  ],
+  "u13-no-order": [
+   "U13_no_order"
+  ],
+  "u13-no-second": [
+   "U13_no_second_flow"
+  ],
+  "u13-same-flow": [
+   "U13_same_flow"
+  ],
+  "u13-second-unresolved": [
+   "U13_second_unresolved"
+  ],
+  "u13-type-mismatch": [
+   "U13_type_mismatch"
+  ],
+  "u13-weaker-parent": [
+   "U13_weaker_parent"
+  ],
+  "u14-bad-baseline": [
+   "U14_bad_baseline"
+  ],
+  "u14-no-note": [
+   "U14_no_baseline_note"
+  ],
+  "u14-no-window": [
+   "U14_missing_field"
+  ],
+  "u2-no-parent": [
+   "U2_no_parent"
+  ],
+  "u2-unresolved": [
+   "U2_parent_unresolved"
+  ],
+  "u3-mismatch": [
+   "U3_severity_mismatch"
+  ],
+  "u3-missing-input": [
+   "U3_missing_input"
+  ],
+  "u3-weight-restated": [
+   "U3_weight_restated"
+  ],
+  "u4-deleted": [
+   "U4_deleted"
+  ],
+  "u4-unrefuted": [
+   "U4_unrefuted"
+  ],
+  "u5-bad-kind": [
+   "U5_bad_kind"
+  ],
+  "u5-no-instrument": [
+   "U5_no_instrument"
+  ],
+  "u5-no-metric": [
+   "U5_no_metric"
+  ],
+  "u5-no-refutation": [
+   "U5_no_refutation"
+  ],
+  "u6-illegal-metric": [
+   "U6_illegal_for_type"
+  ],
+  "u6-not-applicable": [
+   "U6_not_applicable"
+  ],
+  "u6-unknown-type": [
+   "U6_unknown_app_type"
+  ],
+  "u7-no-provenance": [
+   "U7_no_provenance"
+  ],
+  "u7-stale-premise": [
+   "U7_stale_premise"
+  ],
+  "u7-unlocked-weight": [
+   "U7_unlocked_weight"
+  ],
+  "u8-no-baseline": [
+   "U8_no_baseline"
+  ],
+  "u9-no-min-n": [
+   "U9_no_min_n"
+  ],
+  "u9-no-rule": [
+   "U9_no_rule"
+  ],
+  "w1-all-proven": [
+   "W1_all_proven"
+  ],
+  "w2-no-flow-level": [
+   "W2_no_flow_level"
+  ],
+  "w3-no-baseline": [
+   "W3_no_baseline"
+  ],
+  "w4-orphan-open": [
+   "W4_orphan_open"
+  ]
+ }
+}
