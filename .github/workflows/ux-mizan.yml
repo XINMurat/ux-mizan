@@ -661,6 +661,26 @@ jobs:
           cp /tmp/mirror-backup "docs/en/$f"
           echo "ok -- drift is caught"
 
+      - name: Shared tools are still the shared copy
+        run: |
+          set -e
+          # Seven tools are copied, not imported, into the four repositories;
+          # a copy edited alone is how the CRLF-blind package check survived.
+          # Manifest and reasoning: tools/check_shared_tools.py.
+          python tools/check_shared_tools.py
+
+      - name: Self-test — a shared tool edited alone is caught
+        run: |
+          set -e
+          cp tools/token_budget.py /tmp/shared-backup
+          echo "# edited in one repository only" >> tools/token_budget.py
+          if python tools/check_shared_tools.py; then
+            cp /tmp/shared-backup tools/token_budget.py
+            echo "FAIL: a drifted shared tool went unnoticed" >&2; exit 1
+          fi
+          cp /tmp/shared-backup tools/token_budget.py
+          echo "ok -- drift is caught"
+
       - name: The context budget holds (T0/T1 and the per-run sets)
         run: |
           set -e
