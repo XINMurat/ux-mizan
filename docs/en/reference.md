@@ -65,6 +65,7 @@ reasons without naming them (R2 missing data, R8 missing independence).
 ```bash
 python skill/ux-mizan/scripts/ux_validate.py --lang tr --strict ux-registry.yaml
 python skill/ux-mizan/scripts/ux_validate.py --against HEAD ux-registry.yaml
+python skill/ux-mizan/scripts/ux_validate.py --format github ux-registry.yaml  # PR annotations (json also); same exit code
 ```
 
 ## The metric matrix

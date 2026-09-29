@@ -363,6 +363,10 @@ MSG = {
         "{path} does not look like a ux-mizan registry (no 'flows' key).",
         "{path} bir ux-mizan registry'sine benzemiyor ('flows' anahtari yok).",
     ),
+    "bad_shape": (
+        "{path}: {what} -- refused rather than skipped, because a skipped entry shrinks the count and passes.",
+        "{path}: {what} -- atlanmadi reddedildi, cunku atlanan girdi sayiyi kucultur ve gecer.",
+    ),
     "clean": (
         "OK: {path} satisfies U1-U14.",
         "TAMAM: {path} U1-U14 kurallarini sagliyor.",
@@ -767,7 +771,30 @@ def load_yaml(path: str, lang: str) -> dict:
     if not isinstance(data, dict) or "flows" not in data:
         sys.stderr.write(m("not_registry", lang, path=path) + "\n")
         sys.exit(2)
+    what = _shape_problem(data)
+    if what:
+        sys.stderr.write(m("bad_shape", lang, path=path, what=what) + "\n")
+        sys.exit(2)
     return data
+
+
+def _shape_problem(data: dict) -> str:
+    """The rules read these sections and silently drop what is not a mapping,
+    so a wrong type either crashed (exit 1, the violations code) or passed with
+    fewer entries than were written."""
+    reg = data.get("registry")
+    if reg is not None and not isinstance(reg, dict):
+        return "'registry' must be a mapping, got %s" % type(reg).__name__
+    for key in ("flows", "findings", "evidence_artifacts"):
+        val = data.get(key)
+        if val is None:
+            continue
+        if not isinstance(val, list):
+            return "'%s' must be a list, got %s" % (key, type(val).__name__)
+        for i, item in enumerate(val):
+            if not isinstance(item, dict):
+                return "'%s'[%d] must be a mapping, got %s" % (key, i, type(item).__name__)
+    return ""
 
 
 def load_baseline(ref: str, path: str, lang: str) -> dict | None:
@@ -793,6 +820,37 @@ def load_baseline(ref: str, path: str, lang: str) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
+# --format json|github. The exit code does not change with the format: the
+# format decides how the verdict is SHOWN, never what it is. `github` writes
+# workflow commands, so each finding appears on the PR's diff as an
+# annotation on the file instead of only in a log nobody opens.
+_CODE = re.compile(r"^\s*([A-Z]{1,3}\d+)")
+
+
+def _finding(msg: str) -> dict:
+    mt = _CODE.match(msg)
+    return {"code": mt.group(1) if mt else None, "message": msg.strip()}
+
+
+def _gh_escape(s: str) -> str:
+    return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def emit(fmt: str, path: str, errs: list[str], warns: list[str], entries: int) -> None:
+    if fmt == "json":
+        import json
+        print(json.dumps({"file": path, "entries": entries, "clean": not errs,
+                          "violations": [_finding(e) for e in errs],
+                          "warnings": [_finding(w) for w in warns if w not in errs]},
+                         ensure_ascii=False, indent=2))
+        return
+    for kind, items in (("error", errs), ("warning", [w for w in warns if w not in errs])):
+        for msg in items:
+            f = _finding(msg)
+            title = (",title=" + f["code"]) if f["code"] else ""
+            print("::%s file=%s%s::%s" % (kind, path, title, _gh_escape(f["message"])))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="ux-mizan registry validator (U1-U14, W1-W4)")
@@ -805,6 +863,8 @@ def main() -> int:
                              "Pin it to make a run reproducible.")
     parser.add_argument("--strict", action="store_true",
                         help="promote warnings W1-W4 to violations")
+    parser.add_argument("--format", choices=["text", "json", "github"], default="text",
+                        help="text (default), json, or github workflow annotations; the exit code is the same")
     args = parser.parse_args()
     # Pin "today" for U12 before anything reads it.
     _AS_OF["value"] = args.as_of
@@ -821,6 +881,12 @@ def main() -> int:
         baseline = load_baseline(args.against, args.registry, args.lang)
         if baseline is not None:
             check_append_only(reg, baseline, rep)
+
+    if args.format != "text":
+        errs = rep.violations + (rep.warnings if args.strict else [])
+        emit(args.format, args.registry, errs, rep.warnings,
+             len(_flows(reg)) + len(_findings(reg)))
+        return 1 if errs else 0
 
     for line in rep.violations:
         print(line)

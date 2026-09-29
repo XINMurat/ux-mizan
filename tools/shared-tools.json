@@ -1,0 +1,13 @@
+{
+  "_comment": "Tools copied byte-for-byte into Iskele, Kiyas, Mizan and ux-mizan. sha256 of the LF bytes. Identical in all four repositories; checked by tools/check_shared_tools.py here and compared across the four main branches daily by the site repository.",
+  "files": {
+    "tools/build_skill.py": "334fe5968c169e182534b4d3ba3b105d0af203a02edbcc601a32bcc336c8ccce",
+    "tools/check_lang_parity.py": "d8661f0378f004847eaf3abbfdb0a5358258e2205df33e484929957e2b3846b7",
+    "tools/check_shared_tools.py": "6e32347b6c803603b6e4b91100d0d629416606da136147ff7139a5165227a6d5",
+    "tools/check_version_pin.py": "2098244a73d3ad46d06b1a4fe1de2314d23bb546a9dfaf305147437a9bb88d06",
+    "tools/leak_check.py": "1f1beec6640fd4489f768ad44f6d2c971fd262e0d49847a884c7b089d209e217",
+    "tools/sync_en_docs.py": "92769d6a60014282d2246ffc8cb420a49b8b058b570591356cdeb9bd2a30418e",
+    "tools/sync_forbidden_terms.py": "2b3d6e3928d888a68fe38f44eaf7532c1a5743f842e572cf882a925cd658a2b2",
+    "tools/token_budget.py": "47e20813d80677d9667a4ff7969ebeef218f9aeeae1d5ab97ed15243b7f794f5"
+  }
+}

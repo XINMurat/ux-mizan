@@ -30,14 +30,15 @@ USAGE
     python tools/sync_forbidden_terms.py       # push the list to the CI secret
     python tools/sync_forbidden_terms.py --check   # has it drifted from the secret?
     python tools/leak_check.py                 # sweep tracked files
-    python tools/leak_check.py --package ux-mizan.skill
+    python tools/leak_check.py --package <name>.skill   # this repo's package
     python tools/leak_check.py --staged        # what a pre-commit hook runs
-    FORBIDDEN_TERMS="$(cat list)" python tools/leak_check.py   # CI, from a secret
+    FORBIDDEN_TERMS="$(cat list)" python tools/leak_check.py --require  # CI, from a secret
 
 The list is one extended-regex term per line; blank lines and lines starting
 with `#` are ignored. With no list configured the sweep reports NOT CONFIGURED
 and exits 0: an absent list is a repository that has not set this up, which is
-not the same as a repository that failed.
+not the same as a repository that failed. CI passes --require, where an empty
+secret would otherwise print the same green line as a clean tree.
 """
 from __future__ import annotations
 
@@ -101,10 +102,25 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--terms", help="file of forbidden terms (default: env, then .forbidden-terms)")
     ap.add_argument("--package", help="also sweep inside this .skill/.zip")
     ap.add_argument("--staged", action="store_true", help="sweep staged files instead of all tracked ones")
+    ap.add_argument("--require", action="store_true",
+                    help="fail when no list is configured (CI, where the secret must be set)")
     args = ap.parse_args(argv)
+
+    # A package that is not there would otherwise be skipped and the sweep
+    # would report clean for the artifact it was asked to prove clean.
+    if args.package and not os.path.isfile(args.package):
+        print(f"leak-check: FAIL -- package {args.package} not found", file=sys.stderr)
+        return 2
 
     terms, source = load_terms(args.terms)
     if not terms:
+        # Locally an absent list is a repository not set up, not a failure.
+        # In CI it is a sweep that can never find anything: an empty secret
+        # and a clean tree print the same green line. --require tells them apart.
+        if args.require:
+            print(f"leak-check: FAIL -- NOT CONFIGURED (no terms in {source}) and --require given",
+                  file=sys.stderr)
+            return 1
         print(f"leak-check: NOT CONFIGURED (no terms in {source}) -- see the module docstring")
         return 0
 

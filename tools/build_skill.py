@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Package skill/ux-mizan/ into ux-mizan.skill (a zip with stable contents).
+Package skill/<name>/ into <name>.skill (a zip with stable contents).
+
+<name> is the one directory under skill/, so this file is byte-identical in
+every repository of the family. It was ux-mizan's alone; the others shipped
+packages built by hand on Windows, with CRLF line endings inside -- including
+a `#!/usr/bin/env python3\r` shebang that `./script.py` cannot run -- and no
+check that the package still matched the source.
 
 Stability matters more than it looks: CI compares the package against the
 source file by file, and a zip that embeds timestamps produces a different
@@ -21,8 +27,20 @@ import sys
 import zipfile
 
 SOURCE_ROOT = "skill"
-SKILL_DIR = os.path.join(SOURCE_ROOT, "ux-mizan")
-OUTPUT = "ux-mizan.skill"
+
+
+def _skill_name() -> str:
+    names = sorted(d for d in os.listdir(SOURCE_ROOT)
+                   if os.path.isdir(os.path.join(SOURCE_ROOT, d))) if os.path.isdir(SOURCE_ROOT) else []
+    if len(names) != 1:
+        sys.exit(f"ERROR: expected exactly one directory under {SOURCE_ROOT}/, found {names} "
+                 "(run this from the repository root)")
+    return names[0]
+
+
+NAME = _skill_name()
+SKILL_DIR = os.path.join(SOURCE_ROOT, NAME)
+OUTPUT = f"{NAME}.skill"
 FIXED_DATE = (2026, 1, 1, 0, 0, 0)
 SKIP_DIRS = {"__pycache__"}
 SKIP_EXT = {".pyc"}
@@ -69,8 +87,13 @@ def check() -> int:
                 problems.append(f"{name}: in source but not packaged")
                 continue
             with open(os.path.join(SOURCE_ROOT, name), "rb") as handle:
-                if normalise(archive.read(name)) != normalise(handle.read()):
-                    problems.append(f"{name}: content differs from source")
+                packed, source = archive.read(name), normalise(handle.read())
+                # The package is compared as packaged, not normalised: a CRLF
+                # inside it is the defect this check exists for.
+                if packed != source:
+                    problems.append(f"{name}: " + (
+                        "CRLF line endings in the package"
+                        if normalise(packed) == source else "content differs from source"))
         for name in sorted(packaged - set(source_files())):
             problems.append(f"{name}: packaged but missing from source")
     if problems:
@@ -84,7 +107,7 @@ def check() -> int:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build or verify ux-mizan.skill")
+    parser = argparse.ArgumentParser(description=f"Build or verify {OUTPUT}")
     parser.add_argument("--check", action="store_true",
                         help="verify the package matches the source; write nothing")
     args = parser.parse_args()
