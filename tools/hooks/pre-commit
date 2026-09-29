@@ -44,9 +44,9 @@ for f in "${files[@]}"; do
   echo "ux-mizan: validating $f"
   # HEAD may not have the file yet (a new registry) — --against is best-effort.
   if git cat-file -e "HEAD:$f" 2>/dev/null; then
-    "$PYTHON" "$validator" --lang "$LANG_OPT" --against HEAD "$here/$f" || fail=1
+    "$PYTHON" "$validator" --lang "$LANG_OPT" --against HEAD "$here/$f" || { fail=1; "$PYTHON" "$here/tools/rule_hits.py" log "$validator" "$here/$f" || true; }
   else
-    "$PYTHON" "$validator" --lang "$LANG_OPT" "$here/$f" || fail=1
+    "$PYTHON" "$validator" --lang "$LANG_OPT" "$here/$f" || { fail=1; "$PYTHON" "$here/tools/rule_hits.py" log "$validator" "$here/$f" || true; }
   fi
 done
 

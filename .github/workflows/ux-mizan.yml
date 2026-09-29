@@ -756,6 +756,11 @@ jobs:
           # Shared CONCEPTS too: each validator's tier/class/status sets
           # must equal tools/family-vocabulary.yaml.
           python tools/check_vocabulary.py
+          # The documented install is `git config core.hooksPath tools/hooks`,
+          # which silently skips a hook that is not executable. It was 100644
+          # in all four repositories, so the gate ran for nobody who used it.
+          [ "$(git ls-files -s tools/hooks/pre-commit | cut -c1-6)" = "100755" ] \
+            || { echo "FAIL: tools/hooks/pre-commit is not executable in git" >&2; exit 1; }
 
       - name: Self-test — a shared tool edited alone is caught
         run: |
