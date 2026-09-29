@@ -363,6 +363,10 @@ MSG = {
         "{path} does not look like a ux-mizan registry (no 'flows' key).",
         "{path} bir ux-mizan registry'sine benzemiyor ('flows' anahtari yok).",
     ),
+    "bad_shape": (
+        "{path}: {what} -- refused rather than skipped, because a skipped entry shrinks the count and passes.",
+        "{path}: {what} -- atlanmadi reddedildi, cunku atlanan girdi sayiyi kucultur ve gecer.",
+    ),
     "clean": (
         "OK: {path} satisfies U1-U14.",
         "TAMAM: {path} U1-U14 kurallarini sagliyor.",
@@ -767,7 +771,30 @@ def load_yaml(path: str, lang: str) -> dict:
     if not isinstance(data, dict) or "flows" not in data:
         sys.stderr.write(m("not_registry", lang, path=path) + "\n")
         sys.exit(2)
+    what = _shape_problem(data)
+    if what:
+        sys.stderr.write(m("bad_shape", lang, path=path, what=what) + "\n")
+        sys.exit(2)
     return data
+
+
+def _shape_problem(data: dict) -> str:
+    """The rules read these sections and silently drop what is not a mapping,
+    so a wrong type either crashed (exit 1, the violations code) or passed with
+    fewer entries than were written."""
+    reg = data.get("registry")
+    if reg is not None and not isinstance(reg, dict):
+        return "'registry' must be a mapping, got %s" % type(reg).__name__
+    for key in ("flows", "findings", "evidence_artifacts"):
+        val = data.get(key)
+        if val is None:
+            continue
+        if not isinstance(val, list):
+            return "'%s' must be a list, got %s" % (key, type(val).__name__)
+        for i, item in enumerate(val):
+            if not isinstance(item, dict):
+                return "'%s'[%d] must be a mapping, got %s" % (key, i, type(item).__name__)
+    return ""
 
 
 def load_baseline(ref: str, path: str, lang: str) -> dict | None:

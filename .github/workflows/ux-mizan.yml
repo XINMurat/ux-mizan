@@ -82,6 +82,24 @@ jobs:
             exit 1
           fi
 
+      - name: Self-test — a malformed registry is refused, not passed
+        run: |
+          set -e
+          # The rules drop entries that are not mappings, so `flows: [null]`
+          # used to pass with nothing checked, and `flows: 5` crashed with
+          # exit 1 (the violations code). Both must be exit 2, no traceback.
+          tmp="$(mktemp --suffix=.yaml)"
+          expect2() {
+            set +e; out="$(python skill/ux-mizan/scripts/ux_validate.py "$tmp" 2>&1)"; rc=$?; set -e
+            echo "$out"
+            [ "$rc" -eq 2 ] || { echo "FAIL ($1): exit $rc, expected 2" >&2; exit 1; }
+            if echo "$out" | grep -q Traceback; then echo "FAIL ($1): crashed" >&2; exit 1; fi
+          }
+          printf 'flows: 5\n'                 > "$tmp"; expect2 "section not a list"
+          printf 'flows:\n  - null\n'         > "$tmp"; expect2 "entry not a mapping"
+          printf 'flows: []\nregistry: 3\n'   > "$tmp"; expect2 "registry not a mapping"
+          echo "OK: malformed registries are refused with exit 2."
+
       - name: Self-test — U1 must reject a [K] the model gave itself
         run: |
           set -e
@@ -843,7 +861,11 @@ jobs:
           # different code, so a clean tree does not prove a clean ux-mizan.skill.
           # A hit prints the file, the line and the term's index -- never the
           # term, because this log is public.
-          python tools/leak_check.py --package ux-mizan.skill
+          # --require: an empty secret must fail here, not print the same green
+          # line as a clean tree. Fork PRs get no secrets, so they are exempt.
+          req="--require"
+          if [ "${{ github.event.pull_request.head.repo.fork }}" = "true" ]; then req=""; fi
+          python tools/leak_check.py $req --package ux-mizan.skill
 
   skill-package-in-sync:
     runs-on: ubuntu-latest
