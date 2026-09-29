@@ -176,3 +176,19 @@ düzeltmenin uygulamanın amacından mı yoksa jenerik varsayılandan mı
 geldiğini yazılı olarak yanıtlamayan bulguyu reddeder. U10 sorunun
 yanıtlandığını denetler, yanıtın dürüst olduğunu değil; o kısım hâlâ
 insanın işi.
+
+## Using this in your own project? Your blocks can count too
+
+Rule health can only see the projects it can find, and the four skill
+repositories do not know who cloned them. If you want the rules that block
+your commits to count when rules are kept, retired or merged:
+
+1. `git config core.hooksPath tools/hooks` (the hook logs each block locally)
+2. now and then, `python tools/rule_hits.py export` and commit the `rule-hits/`
+   file it writes: rule codes, counts and the validator hash, nothing else
+3. be findable: a GitHub fork is found automatically; a plain clone needs the
+   repository topic `mizan-rule-hits`
+
+Nothing is sent anywhere. The site's daily job reads `rule-hits/` from forks and
+tagged repositories through the public API; a project that does neither is not
+counted, and the report calls its number a floor, not the field.
