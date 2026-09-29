@@ -71,9 +71,9 @@ jobs:
             esac
             echo "::group::$rel ${strict:-(advisory)}"
             if [ -n "$base" ]; then
-              python skill/ux-mizan/scripts/ux_validate.py $strict --against "$base" "$rel"
+              python skill/ux-mizan/scripts/ux_validate.py $strict --format github --against "$base" "$rel"
             else
-              python skill/ux-mizan/scripts/ux_validate.py $strict "$rel"
+              python skill/ux-mizan/scripts/ux_validate.py $strict --format github "$rel"
             fi
             echo "::endgroup::"
           done < <(find . -path ./.git -prune -o -name '*ux-registry*.y*ml' -print)
@@ -81,6 +81,23 @@ jobs:
             echo "No registry files found to validate." >&2
             exit 1
           fi
+
+      - name: Self-test — the output format never changes the verdict
+        run: |
+          set -e
+          # --format github turns findings into PR annotations; it must not
+          # turn a failing file into a passing one, or the reverse.
+          tmp="$(mktemp --suffix=.yaml)"
+          # The blank template fails --strict on W3/W4 by design (its entries are
+          # unfilled), which makes it a stable failing input.
+          cp templates/ux-registry.yaml "$tmp"
+          for fmt in text json github; do
+            set +e; python skill/ux-mizan/scripts/ux_validate.py --strict --format $fmt "$tmp" > /tmp/out.$fmt; rc=$?; set -e
+            [ "$rc" -eq 1 ] || { echo "FAIL: --format $fmt exited $rc on a failing file" >&2; exit 1; }
+          done
+          python -c "import json; d=json.load(open('/tmp/out.json')); assert not d['clean'] and d['violations'], d"
+          grep -q '^::error file=' /tmp/out.github || { echo "FAIL: no annotation emitted" >&2; exit 1; }
+          echo "OK: text, json and github agree on the verdict."
 
       - name: Self-test — a malformed registry is refused, not passed
         run: |

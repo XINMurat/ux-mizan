@@ -820,6 +820,37 @@ def load_baseline(ref: str, path: str, lang: str) -> dict | None:
     return data if isinstance(data, dict) else None
 
 
+# --format json|github. The exit code does not change with the format: the
+# format decides how the verdict is SHOWN, never what it is. `github` writes
+# workflow commands, so each finding appears on the PR's diff as an
+# annotation on the file instead of only in a log nobody opens.
+_CODE = re.compile(r"^\s*([A-Z]{1,3}\d+)")
+
+
+def _finding(msg: str) -> dict:
+    mt = _CODE.match(msg)
+    return {"code": mt.group(1) if mt else None, "message": msg.strip()}
+
+
+def _gh_escape(s: str) -> str:
+    return s.replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+
+
+def emit(fmt: str, path: str, errs: list[str], warns: list[str], entries: int) -> None:
+    if fmt == "json":
+        import json
+        print(json.dumps({"file": path, "entries": entries, "clean": not errs,
+                          "violations": [_finding(e) for e in errs],
+                          "warnings": [_finding(w) for w in warns if w not in errs]},
+                         ensure_ascii=False, indent=2))
+        return
+    for kind, items in (("error", errs), ("warning", [w for w in warns if w not in errs])):
+        for msg in items:
+            f = _finding(msg)
+            title = (",title=" + f["code"]) if f["code"] else ""
+            print("::%s file=%s%s::%s" % (kind, path, title, _gh_escape(f["message"])))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="ux-mizan registry validator (U1-U14, W1-W4)")
@@ -832,6 +863,8 @@ def main() -> int:
                              "Pin it to make a run reproducible.")
     parser.add_argument("--strict", action="store_true",
                         help="promote warnings W1-W4 to violations")
+    parser.add_argument("--format", choices=["text", "json", "github"], default="text",
+                        help="text (default), json, or github workflow annotations; the exit code is the same")
     args = parser.parse_args()
     # Pin "today" for U12 before anything reads it.
     _AS_OF["value"] = args.as_of
@@ -848,6 +881,12 @@ def main() -> int:
         baseline = load_baseline(args.against, args.registry, args.lang)
         if baseline is not None:
             check_append_only(reg, baseline, rep)
+
+    if args.format != "text":
+        errs = rep.violations + (rep.warnings if args.strict else [])
+        emit(args.format, args.registry, errs, rep.warnings,
+             len(_flows(reg)) + len(_findings(reg)))
+        return 1 if errs else 0
 
     for line in rep.violations:
         print(line)

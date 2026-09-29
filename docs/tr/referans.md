@@ -65,6 +65,7 @@ adlandırmadan zaten taşıyor (R2 veri eksikliği, R8 bağımsızlık eksikliğ
 ```bash
 python skill/ux-mizan/scripts/ux_validate.py --lang tr --strict ux-registry.yaml
 python skill/ux-mizan/scripts/ux_validate.py --against HEAD ux-registry.yaml
+python skill/ux-mizan/scripts/ux_validate.py --format github ux-registry.yaml  # PR annotation'ları (json da var); çıkış kodu aynı
 ```
 
 ## Metrik matrisi
