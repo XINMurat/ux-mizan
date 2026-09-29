@@ -226,7 +226,16 @@ def main() -> int:
     args = parser.parse_args()
 
     if not os.path.isdir(args.root):
-        sys.exit(f"ERROR: {args.root} is not a directory")
+        print(f"ERROR: {args.root} is not a directory", file=sys.stderr)
+        return 2
+    # A directory with no source files in it -- a wrong path, the repo root
+    # instead of src/, a --file that matches nothing -- used to print a
+    # report of zeros that reads exactly like a clean app. An absence of
+    # input is not an absence of findings.
+    if not any(True for _ in iter_sources(args.root)):
+        print(f"ERROR: no {'/'.join(sorted(SOURCE_EXT))} files under {args.root} -- "
+              "nothing was scanned, so nothing can be reported", file=sys.stderr)
+        return 2
 
     result = scan(args.root)
     if args.json:

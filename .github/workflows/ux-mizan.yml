@@ -492,6 +492,50 @@ jobs:
           print(f"OK: L={value:.3f} in range; degenerate inputs return None.")
           PY
 
+      - name: Self-test — lostness measures the task, one session at a time
+        run: |
+          set -e
+          L=skill/ux-mizan/scripts/lostness.py
+          ev() { printf '{"session_id":"%s","flow_id":"F","screen":"%s","ts":%s}\n' "$@"; }
+          # 1. A perfect path, then browsing after success. The browsing is not
+          #    the task; counting it read L=0.417 -- "lost" -- for no wrong step.
+          { ev s1 /a 1; ev s1 /b 2; ev s1 /done 3; ev s1 /x 4; ev s1 /a 5; ev s1 /x 6; } > /tmp/a.jsonl
+          python "$L" /tmp/a.jsonl --flow F --R 3 --success /done | tee /tmp/a.out
+          grep -q "s1: N=3 S=3 R=3 L=0.000" /tmp/a.out \
+            || { echo "FAIL: screens after success were counted" >&2; exit 1; }
+          # 2. Out of arrival order: ts decides where the task ends.
+          { ev s2 /done 3; ev s2 /a 1; ev s2 /b 2; } > /tmp/b.jsonl
+          python "$L" /tmp/b.jsonl --flow F --R 3 --success /done | grep -q "s2: N=3 S=3 R=3 L=0.000" \
+            || { echo "FAIL: the session was not ordered by ts" >&2; exit 1; }
+          # 3. No session_id: refused, not merged under 'None'. 4. Bad JSON: exit 2.
+          printf '{"flow_id":"F","screen":"/a"}\n' > /tmp/c.jsonl
+          set +e; python "$L" /tmp/c.jsonl --flow F --R 3 >/dev/null 2>&1; rc=$?; set -e
+          [ "$rc" -eq 2 ] || { echo "FAIL: an event with no session_id gave exit $rc" >&2; exit 1; }
+          echo 'not json' > /tmp/d.jsonl
+          set +e; python "$L" /tmp/d.jsonl --flow F --R 3 >/dev/null 2>&1; rc=$?; set -e
+          [ "$rc" -eq 2 ] || { echo "FAIL: bad JSON gave exit $rc, the docstring says 2" >&2; exit 1; }
+          echo "OK: the task ends at success, sessions stay apart, errors exit 2."
+
+      - name: Self-test — a scan of nothing is not a clean scan
+        run: |
+          set -e
+          # Pointed at a directory with no front-end source (a typo, the repo
+          # root, a Python project), the three scanners printed zeros / "no
+          # signals" with exit 0 -- the same output as a clean app.
+          mkdir -p /tmp/nosrc && echo "x = 1" > /tmp/nosrc/a.py
+          for s in structural_checks component_inventory layout_signals; do
+            for d in /tmp/nosrc /tmp/does-not-exist; do
+              set +e; python skill/ux-mizan/scripts/$s.py "$d" >/dev/null 2>&1; rc=$?; set -e
+              [ "$rc" -eq 2 ] || { echo "FAIL: $s on $d exited $rc, expected 2" >&2; exit 1; }
+            done
+          done
+          mkdir -p /tmp/app/pages
+          printf 'export function HomePage() {\n  return <div onClick={() => go()}>Click here</div>;\n}\n' > /tmp/app/pages/HomePage.tsx
+          for s in structural_checks component_inventory layout_signals; do
+            python skill/ux-mizan/scripts/$s.py /tmp/app >/dev/null
+          done
+          echo "OK: an empty scan exits 2; a real one still runs."
+
   product-registry:
     runs-on: ubuntu-latest
     steps:

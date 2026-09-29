@@ -334,6 +334,14 @@ def main() -> int:
     if not os.path.isdir(a.root):
         print(f"not a directory: {a.root}", file=sys.stderr)
         return 2
+    # A directory with no source files in it -- a wrong path, the repo root
+    # instead of src/, a directory of the wrong language -- used to print a
+    # report of zeros that reads exactly like a clean app. An absence of
+    # input is not an absence of findings.
+    if not any(True for _ in iter_files(a.root, SOURCE_EXT)):
+        print(f"no {'/'.join(sorted(SOURCE_EXT))} files under {a.root} -- "
+              "nothing was scanned, so 'no signals' would mean nothing", file=sys.stderr)
+        return 2
 
     res = analyse(a.root, a.top)
     if a.json:
