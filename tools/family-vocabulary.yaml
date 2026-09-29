@@ -1,0 +1,18 @@
+# The concepts the four skills share, defined once.
+#
+# Shared tools were pinned by hash; shared CONCEPTS were not, and one had
+# already drifted: ux-mizan's schema and its U12 message both offered
+# `status: parked`, while its validator rejected it. This file is copied
+# byte-for-byte into Mizan, Kiyas, Iskele and ux-mizan (tools/shared-tools.json)
+# and tools/check_vocabulary.py compares each repository's validator constants
+# against it. To change a term: edit here, update every constant the check
+# names, and copy this file to all four repositories in one change.
+
+evidence_tiers: [K, H, S, R, KKE, Y]          # Mizan, ux-mizan
+seed_tiers: [S, H-aday, NK, GB]               # Kiyas: pre-registry, never K
+arbiter_classes: [runtime, instrument, third_party, author, none]
+executable_arbiters: [runtime, instrument, third_party]   # may lift a claim past self-report
+kke_kinds: [control, independence, data, validation]      # ux-mizan U11
+ux_finding_statuses: [open, instrumented, confirmed, refuted, parked]
+ux_metric_kinds: [structural, accessibility, behavioural]
+ux_provenance: [structural-check, walkthrough, human, moderated-session, real-data]

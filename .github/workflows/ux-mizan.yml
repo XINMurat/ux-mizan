@@ -753,6 +753,9 @@ jobs:
           # a copy edited alone is how the CRLF-blind package check survived.
           # Manifest and reasoning: tools/check_shared_tools.py.
           python tools/check_shared_tools.py
+          # Shared CONCEPTS too: each validator's tier/class/status sets
+          # must equal tools/family-vocabulary.yaml.
+          python tools/check_vocabulary.py
 
       - name: Self-test — a shared tool edited alone is caught
         run: |

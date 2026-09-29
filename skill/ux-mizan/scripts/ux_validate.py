@@ -67,7 +67,7 @@ VALID_KKE_KINDS = {
 # carry -- a second flow, the guarantee that breaks, and the order when the
 # pair is asymmetric -- and a flag would have let half of that stay optional.
 VALID_FINDING_TYPES = {"flow-level", "component-contributing", "conjunction"}
-VALID_STATUS = {"open", "instrumented", "confirmed", "refuted"}
+VALID_STATUS = {"open", "instrumented", "confirmed", "refuted", "parked"}
 
 # Metric applicability matrix (U6). Mirrors the comment block in
 # schemas/ux-registry.yaml; if the two ever disagree, THIS is the one
