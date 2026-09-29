@@ -536,6 +536,30 @@ jobs:
           done
           echo "OK: an empty scan exits 2; a real one still runs."
 
+      - name: Self-test — findings become work of the right kind
+        run: |
+          set -e
+          python skill/ux-mizan/scripts/ux_to_backlog.py \
+            examples/ux-registry.example.yaml --out /tmp/ux.md
+          python - <<'PY'
+          import sys, yaml
+          reg = yaml.safe_load(open("examples/ux-registry.example.yaml", encoding="utf-8"))
+          f = reg["findings"]
+          fix = sum(1 for x in f if x.get("status") == "confirmed")
+          measure = sum(1 for x in f if x.get("status") in ("open", "instrumented")
+                        and str(x.get("tier")).upper() in ("H", "KKE"))
+          md = open("/tmp/ux.md", encoding="utf-8").read()
+          got = (md.count(" duzelt: "), md.count(" olc: "))
+          print("want", (fix, measure), "got", got)
+          if got != (fix, measure) or fix + measure == 0:
+              print("FAIL: a finding was lost, invented or mis-kinded"); sys.exit(1)
+          if any(f"{x['finding_id']} duzelt:" in md or f"{x['finding_id']} olc:" in md
+                 for x in f if x.get("status") in ("refuted", "parked")):
+              print("FAIL: a refuted finding became a task"); sys.exit(1)
+          PY
+          set +e; python skill/ux-mizan/scripts/ux_to_backlog.py README.md >/dev/null 2>&1; rc=$?; set -e
+          [ "$rc" -eq 2 ] || { echo "FAIL: a non-registry exited $rc, expected 2" >&2; exit 1; }
+
   product-registry:
     runs-on: ubuntu-latest
     steps:

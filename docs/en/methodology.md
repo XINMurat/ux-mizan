@@ -353,6 +353,8 @@ an audit, tiers in place, judgment gone.
   than overwrite, and enforce it with the validator, not by reading it.
 - `scripts/ux_validate.py` — U1–U14 without a model.
 - `scripts/lostness.py` — per-flow lostness from a screen-visit log.
+- `scripts/ux_to_backlog.py` — findings → İskele backlog: confirmed → fix
+  task (accepted on its own metric), open [H] → measure task, the rest parked.
 - `scripts/structural_checks.py` — Layer-A proxies for React/TS: what is
   missing (states, feedback, labels, depth).
 - `scripts/component_inventory.py` — Layer-A traces ACROSS files: value
