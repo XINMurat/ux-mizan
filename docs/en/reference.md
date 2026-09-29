@@ -94,6 +94,7 @@ one that runs, and the disagreement is itself a finding.
 | `structural_checks.py` | State coverage, feedback gaps, generic labels, nav depth, orphan routes | `[KKE]` — what is missing |
 | `layout_signals.py` | Arrangement traces + the behavioural hypothesis each licenses | trace `[KKE]`, claim `[H]` |
 | `lostness.py` | Per-flow L, completed and abandoned reported apart | needs Layer-B data to mean anything |
+| `ux_to_backlog.py` | Findings → İskele tasks: confirmed → fix, open [H] → measure | estimates are not guessed; every task is marked uncalibrated |
 
 ## Two rules that are not in any script
 

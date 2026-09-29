@@ -94,6 +94,7 @@ Matris hem şemada belgelidir hem `ux_validate.py` içinde
 | `structural_checks.py` | Durum kapsamı, geri bildirim boşlukları, jenerik etiketler, nav derinliği, yetim rotalar | `[KKE]` — ne eksik |
 | `layout_signals.py` | Yerleşim izleri + her birinin izin verdiği davranışsal hipotez | iz `[KKE]`, iddia `[H]` |
 | `lostness.py` | Akış başına L; tamamlanan ve terk edilen ayrı raporlanır | anlam kazanması için Katman-B verisi gerekir |
+| `ux_to_backlog.py` | Bulgular → İskele görevleri: doğrulanmış → düzeltme, açık [H] → ölçüm | tahmin uydurulmaz; her görev kalibresiz işaretlenir |
 
 ## Hiçbir betikte olmayan iki kural
 

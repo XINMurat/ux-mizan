@@ -60,6 +60,9 @@ produce `[K]` (Layer B). **If the referee writes it, there is no `[K]`.**
 - **`ux_validate.py`** — rules U1–U14 enforced without a model.
 - **`lostness.py`** — Smith (1996) per flow, from ordinary screen-view
   telemetry, with its four caveats printed beside every number.
+- **`ux_to_backlog.py`** — findings → İskele backlog tasks: a confirmed
+  finding becomes a FIX task accepted on its own metric, an open [H] one a
+  MEASURE task; refuted and parked findings never become work.
 - **`structural_checks.py`** — Layer-A React/TS proxies, all `[KKE]`.
 - **`layout_signals.py`** — traces of ARRANGEMENT (items rendered all-open,
   a current item marked by colour alone, a screen with nothing to scan by),
@@ -145,6 +148,9 @@ gerçek kullanıcı veya otomatik hakemden gelir (Katman B).
 - **`ux_validate.py`** — U1–U14, modelsiz.
 - **`lostness.py`** — Smith (1996), akış başına, sıradan ekran
   telemetrisinden; dört uyarısı her sayının yanında basılır.
+- **`ux_to_backlog.py`** — bulgular → İskele backlog görevleri: doğrulanmış
+  bulgu kendi metriğiyle kabul edilen bir DÜZELTME, açık [H] bulgu bir ÖLÇÜM
+  görevi olur; çürütülmüş ve park edilmiş bulgu asla iş olmaz.
 - **`structural_checks.py`** — Katman-A React/TS vekilleri, hepsi `[KKE]`.
 - **`layout_signals.py`** — YERLEŞİM izleri (hepsi açık basılan öğeler,
   yalnızca renkle işaretlenen "şu anki" öğe, taranacak hiçbir şeyi olmayan
