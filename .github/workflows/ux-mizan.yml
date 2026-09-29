@@ -82,6 +82,13 @@ jobs:
             exit 1
           fi
 
+      - name: Rule pairs — every rule satisfiable together, overlaps locked
+        # One clean base shows the rules do not contradict each other; one
+        # mutation per catalog code shows which rules report the same defect.
+        # A changed fired set, a rule that went silent, or a new code with no
+        # fixture fails here; review, then `python tools/rule_pairs.py --update`.
+        run: python tools/rule_pairs.py
+
       - name: Self-test — the output format never changes the verdict
         run: |
           set -e
