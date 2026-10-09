@@ -48,6 +48,27 @@ model can audit structural/heuristic conformance (Layer A → `[H]`/`[KKE]`)
 and **build the measuring rig**; only real users or an automatic instrument
 produce `[K]` (Layer B). **If the referee writes it, there is no `[K]`.**
 
+### What it looks like
+
+Two findings from the **illustrative** example registry that ships with the repo
+([`examples/ux-registry.example.yaml`](examples/ux-registry.example.yaml) — an
+example app and example session data, not a real client audit):
+
+```text
+UX-001 · flow F-001 (send an invoice) · src/invoices/InvoiceActions.tsx:64
+  The only action on a drafted invoice is labelled "Continue"; users read it as
+  "keep editing" and go looking for a Send button.
+  Refuted if: first-click accuracy >= 0.8 over 8 moderated sessions.
+  Status: confirmed · Fix: rename to "Send invoice".
+
+UX-004 · flow F-001 · src/nav/Sidebar.tsx:22
+  Hypothesis: the four-level sidebar nesting causes the backtracking.
+  Status: REFUTED, kept on record — the backtracking was the label.
+```
+
+The expensive redesign ("flatten the navigation") was the generic default, and
+the measurement refused it.
+
 ### What it ships
 
 - **Five gates** (0 purpose · 1 type/volume/mode · 2 hypotheses ·
@@ -135,6 +156,27 @@ davranışsaldır. Model yapısal/heuristik uygunluğu denetleyebilir
 (Katman A → `[H]`/`[KKE]`) ve **ölçüm düzeneğini kurabilir**; `[K]` yalnızca
 gerçek kullanıcı veya otomatik hakemden gelir (Katman B).
 **Hakem yazarsa `[K]` yoktur.**
+
+### Nasıl görünür
+
+Repo'yla gelen **açıklayıcı** örnek registry'den iki bulgu
+([`examples/ux-registry.example.yaml`](examples/ux-registry.example.yaml) — örnek
+bir uygulama ve örnek oturum verisi; gerçek bir müşteri denetimi değil):
+
+```text
+UX-001 · akış F-001 (fatura gönder) · src/invoices/InvoiceActions.tsx:64
+  Taslak faturadaki tek eylemin etiketi "Continue"; kullanıcılar bunu
+  "düzenlemeye devam" diye okuyor ve bir Gönder düğmesi aramaya gidiyor.
+  Çürütülür: 8 moderasyonlu oturumda ilk tıklama doğruluğu >= 0.8 ise.
+  Durum: doğrulandı · Düzeltme: "Send invoice" olarak yeniden adlandır.
+
+UX-004 · akış F-001 · src/nav/Sidebar.tsx:22
+  Hipotez: kenar çubuğunun dört seviyeli iç içeliği geri dönüşlere yol açıyor.
+  Durum: ÇÜRÜTÜLDÜ, kayıtta tutuluyor — geri dönüşün nedeni etiketti.
+```
+
+Pahalı yeniden tasarım ("navigasyonu düzleştir") jenerik varsayılandı ve ölçüm
+onu reddetti.
 
 ### İçindekiler
 
