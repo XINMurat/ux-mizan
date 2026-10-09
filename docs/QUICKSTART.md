@@ -10,7 +10,7 @@ koşusudur.
 
 ## English
 
-**Status: v0.6 `[H]` / `[KKE]`.** The first real run is the self-validation run; treat
+**Status: v0.7 `[H]` / `[KKE]`.** The first real run is the self-validation run; treat
 its output as a test of the skill as much as of your app.
 
 ### 1. Install
@@ -82,7 +82,7 @@ git config core.hooksPath tools/hooks     # or copy tools/hooks/pre-commit
 
 ## Türkçe
 
-**Statü: v0.6 `[H]` / `[KKE]`.** İlk gerçek koşu, öz-doğrulama koşusudur;
+**Statü: v0.7 `[H]` / `[KKE]`.** İlk gerçek koşu, öz-doğrulama koşusudur;
 çıktısını uygulamanızın olduğu kadar skill'in de bir sınavı olarak okuyun.
 
 ### 1. Kurulum
